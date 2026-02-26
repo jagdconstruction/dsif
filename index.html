@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DSIF Mobile Web Form</title>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- PDF export (template-fill) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand">Daily Safety Inspection</div>
+      <div class="subbrand">DSIF</div>
+    </div>
+    <div class="topbar-right">
+      <button id="btnReset" type="button" class="btn">Reset</button>
+      <button id="btnSave" type="button" class="btn primary">Save PDF</button>
+    </div>
+  </header>
+
+  <main class="page" id="page">
+    <section class="card">
+      <div class="grid-2">
+        <label class="field">
+          <span class="label">Project</span>
+          <select id="fProject"></select>
+        </label>
+
+        <label class="field">
+          <span class="label">Report Date</span>
+          <input id="fReportDate" type="date"/>
+        </label>
+      </div>
+
+      <div class="attached">
+        <div class="attached-title">Attached Pages</div>
+        <label class="check">
+          <input id="attAccident" type="checkbox"/>
+          <span>Accident Report</span>
+        </label>
+        <label class="check">
+          <input id="attIncident" type="checkbox"/>
+          <span>Incident Report</span>
+        </label>
+        <label class="check">
+          <input id="attViolation" type="checkbox"/>
+          <span>Safety Violation</span>
+        </label>
+      </div>
+    </section>
+
+    <div id="categories"></div>
+
+    <section class="card">
+      <div class="grid-2">
+        <label class="field">
+          <span class="label">Print Name</span>
+          <input id="fPrintName" type="text" inputmode="text" autocomplete="name" placeholder="Print name"/>
+        </label>
+        <div class="field">
+          <span class="label">Signature</span>
+          <button id="sigOpen" type="button" class="sig-box" aria-label="Tap to sign">
+            <canvas id="sigPreview" width="900" height="220"></canvas>
+            <span class="sig-hint">Tap to sign</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="small-note">Save PDF produces a filled DSIF that matches your original form, plus photo pages by category.</div>
+    </section>
+
+    <footer class="footer-note">
+      Tip: If a category is <strong>N/A</strong>, check the N/A box to collapse it; the saved PDF will mark that category as N/A.
+    </footer>
+
+    <!-- Bottom actions (same as top) -->
+    <section class="bottom-actions" aria-label="Form actions">
+      <button id="btnResetBottom" type="button" class="btn">Reset</button>
+      <button id="btnSaveBottom" type="button" class="btn primary">Save PDF</button>
+    </section>
+  </main>
+
+  <!-- Signature modal -->
+  <div id="sigModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Signature">
+    <div class="modal-inner">
+      <div class="modal-title">Sign</div>
+      <div class="sig-pad">
+        <canvas id="sigCanvas" width="1200" height="420"></canvas>
+      </div>
+      <div class="modal-actions">
+        <button id="sigClear" type="button" class="btn">Clear</button>
+        <button id="sigCancel" type="button" class="btn">Cancel</button>
+        <button id="sigSave" type="button" class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- One shared file input for photo upload (camera or library) -->
+  <input id="photoInput" type="file" accept="image/*" multiple class="hidden"/>
+
+  <script src="app.js"></script>
+</body>
+</html>
