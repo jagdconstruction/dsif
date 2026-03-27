@@ -58,6 +58,7 @@ function formatMMDDYYYY(isoDate){
 
 function init(){
   renderTopProjectOptions();
+  wireProjectCustom();
   renderCategories();
   wireActionButtons();
   wirePhotoInput();
@@ -71,12 +72,83 @@ function init(){
 function renderTopProjectOptions(){
   const sel = $("fProject");
   sel.innerHTML = "";
-  for (const opt of (FORM_DEF.projectOptions || [])){
+
+  // Clone options so we can safely augment them.
+  const opts = Array.isArray(FORM_DEF.projectOptions) ? [...FORM_DEF.projectOptions] : [];
+
+  // Ensure a blank option exists at the top.
+  if (!opts.length || String(opts[0]).trim() !== "") {
+    opts.unshift("  ");
+  }
+
+  // Ensure RK19-A exists in the project dropdown.
+  const hasRK19A = opts.some(o => String(o).trim() === "RK19-A");
+  if (!hasRK19A) {
+    // Prefer inserting after RK90 if present; otherwise append.
+    const idx = opts.findIndex(o => String(o).trim() === "RK90");
+    if (idx >= 0) opts.splice(idx + 1, 0, "RK19-A");
+    else opts.push("RK19-A");
+  }
+
+  // If a prior custom project was entered, keep it available.
+  const lastCustom = (function(){
+    try { return (localStorage.getItem('dsif_project_custom') || '').trim(); }
+    catch(e){ return ""; }
+  })();
+  if (lastCustom && !opts.some(o => String(o).trim() === lastCustom)) {
+    opts.push(lastCustom);
+  }
+
+  // Render base options.
+  for (const opt of opts){
     const o = document.createElement('option');
     o.value = opt;
     o.textContent = opt.trim() ? opt : "";
     sel.appendChild(o);
   }
+
+  // Add Custom entry option at the end.
+  const custom = document.createElement('option');
+  custom.value = "__CUSTOM__";
+  custom.textContent = "Custom…";
+  sel.appendChild(custom);
+}
+
+function wireProjectCustom(){
+  const sel = $("fProject");
+  if (!sel) return;
+
+  sel.addEventListener('change', function(){
+    if (sel.value !== "__CUSTOM__") return;
+
+    let prev = "";
+    try { prev = (localStorage.getItem('dsif_project_custom') || '').trim(); } catch(e) { prev = ""; }
+
+    const entered = window.prompt("Enter project name", prev);
+
+    if (entered && entered.trim()) {
+      const val = entered.trim();
+
+      try { localStorage.setItem('dsif_project_custom', val); } catch(e) {}
+
+      // If the option doesn't exist yet, insert it just before Custom…
+      let opt = Array.from(sel.options).find(o => o.value === val);
+      if (!opt){
+        opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        // Insert before the Custom… option
+        const customOpt = sel.querySelector('option[value="__CUSTOM__"]');
+        if (customOpt) sel.insertBefore(opt, customOpt);
+        else sel.appendChild(opt);
+      }
+
+      sel.value = val;
+    } else {
+      // Revert to blank.
+      sel.selectedIndex = 0;
+    }
+  });
 }
 
 function wireActionButtons(){
@@ -890,7 +962,18 @@ function safeSelectDropdown(form, fieldName, value){
   try{
     const dd = form.getDropdown(fieldName);
     if (value){
-      dd.select(value);
+      // If the value is not already an allowed option, add it (enables custom project text).
+      try{
+        const opts = dd.getOptions ? dd.getOptions() : [];
+        const has = Array.isArray(opts) && opts.some(x => String(x) === String(value));
+        if (!has && dd.addOptions){
+          dd.addOptions([String(value)]);
+        }
+      } catch(e) {
+        // ignore
+      }
+
+      dd.select(String(value));
     } else {
       // try to select blank option if present
       const opts = dd.getOptions();
