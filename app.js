@@ -1,1122 +1,1855 @@
-/* DSIF Mobile Web Form (template-fill export)
-   - Categories/questions match the provided DSIF PDF
-   - Per-category: collapse toggle, N/A checkbox (hides checklist), photo capture/upload
-   - Signature: popup draw (Option B)
-   - Save PDF: fills the original DSIF template PDF, flattens, then appends photo pages
-*/
+/* DSIF Mobile Web Form - Revision 4.11.26
+ * - Two-page DSIF template
+ * - Per-question photos appended to PDF (4 per page)
+ * - Attached pages (Accident / Incident / Safety Violation) appended to PDF
+ * - Signature capture and placement
+ * - N/A per category (stamps "Not applicable for today <date>")
+ */
 
-const FORM_DEF = {"projectOptions": ["  ", "69th St. Transfer Bridge", "BA-2024-RE-102-CM Mid-Hudson Bridge", "BRX9579 - Boston Road Bridge", "BW96 & VN12 - Whitestone Hellman Platforms", "C35311 - Dyre Ave. Line", "D214898 - TANE22-29 Restani T&M", "D264324 - Westchester County Field Metalizing", "D264965 - Highway bridge repair W&W", "D265046 - Highway bridge repair W&W", "D265307 - WO03", "D265343 - Bove W&W 2", "Devon Bridge", "DMB-25-01", "FCC 2056", "Gold Star Memorial Bridge", "Governors Island", "Grand Concourse", "GW 244.289 Lemoine Ave", "GWB Cables", "HB1070MD - Macombs Dam Bridge", "HBKBQE - NYCDOT Bove", "K7279 & K6176 Gordie Howe", "Park Avenue", "Pulaski 8B", "QBB-2017", "RK90", "Sandy Relief", "VN81X", "VN-84B - Verrazzano Bridge Ramps Brooklyn", "Warehouse"], "categories": [{"id": "blast_and_paint", "title": "Blast and Paint", "type": "checklist", "parent": null, "questions": [{"text": "Are all hoses, couplings, whipchecks, and fittings properly secured?", "yesField": "Check Box86.0.0", "noField": "Check Box86.0.1", "commentField": "Text85"}, {"text": "Are all deadmen fully operational?", "yesField": "Check Box86.1.0", "noField": "Check Box86.1.1", "commentField": "Platform Repairs PerformedAre all deadmen fully operational"}, {"text": "Blast hoods and other proper PPE is being used in good working order?", "yesField": "Check Box86.2.0", "noField": "Check Box86.2.1", "commentField": "Platform Repairs PerformedBlast hoods and other proper PPE is being used in good working order"}, {"text": "Are spray gun safety tips on and knuckle guard and safety lock in good working order?", "yesField": "Check Box86.3.0", "noField": "Check Box86.3.1", "commentField": "Platform Repairs PerformedAre spray gun safety tips on and knuckle guard and safety lock in good working order"}, {"text": "Are all filters (organic vapor and dust) regular end of life change cycle checked?", "yesField": "Check Box86.4.0", "noField": "Check Box86.4.1", "commentField": "Platform Repairs PerformedAre all filters organic vapor and dust regular end of life change cycle checked"}]}, {"id": "platform_scaffold", "title": "Platform/Scaffold", "type": "checklist", "parent": null, "questions": [{"text": "Decking checked for loose sheets and use of self tapping screws to secure overlaps inside work area?", "yesField": "Check Box90.0.0", "noField": "Check Box90.0.1", "commentField": "Text101"}, {"text": "Decking checked for missing or loose clips inside of work area?", "yesField": "Check Box90.1.0", "noField": "Check Box90.1.1", "commentField": "Platform Repairs PerformedDecking checked for missing or loose clips inside of work area"}, {"text": "Tie-ups checked for equal tension to keep platform level inside of work area?", "yesField": "Check Box90.2.0", "noField": "Check Box90.2.1", "commentField": "Platform Repairs PerformedTieups checked for equal tension to keep platform level inside of work area"}, {"text": "Perimeter protection in good working order and/or 100% tieoff enforced on platforms?", "yesField": "Check Box90.3.0", "noField": "Check Box90.3.1", "commentField": "Platform Repairs PerformedPerimeter protection in good working order andor 100 tieoff enforced on platforms"}, {"text": "Platfrom checked for any debris inside of work area?", "yesField": "Check Box90.4.0", "noField": "Check Box90.4.1", "commentField": "Platform Repairs PerformedPlatfrom checked for any debris inside of work area"}]}, {"id": "containment", "title": "Containment", "type": "checklist", "parent": null, "questions": [{"text": "Inspection of the containment for integrity (Sealing of joints and openings, floor covering, make-up air openings and employee entrance area).", "yesField": "Check Box91.0.0", "noField": "Check Box91.0.1", "commentField": "CommentsContainment Inspection of the containment for integrity Sealing of joints and openings floor covering makeup air openings and employee entrance area"}, {"text": "Was the containment dry before blasting?", "yesField": "Check Box91.1.0", "noField": "Check Box91.1.1", "commentField": "CommentsWas the containment dry before blasting"}, {"text": "Were the dust collectors and vacuum machine fully functional throughout the blasting period?", "yesField": "Check Box91.2.0", "noField": "Check Box91.2.1", "commentField": "CommentsWere the dust collectors and vacuum machine fully functional throughout the blasting period"}, {"text": "Inspection of the containment for final cleaning.", "yesField": "Check Box91.3.0", "noField": "Check Box91.3.1", "commentField": "CommentsInspect on of the conta nment for f na c eaning"}]}, {"id": "visible_emissions", "title": "Visible Emissions", "type": "visible_emissions", "rows": [{"label": "Observation 1", "locationsField": "LocationsVisible Emissions", "timeField": "TimeVisible Emissions", "observationField": "Observation PeriodVisible Emissions", "emissionField": "Emission TimeVisible Emissions"}, {"label": "Observation 2", "locationsField": "LocationsVisible Emissions_2", "timeField": "TimeVisible Emissions_2", "observationField": "Observation PeriodVisible Emissions_2", "emissionField": "Emission TimeVisible Emissions_2"}], "commentsField": "CommentsCorrectionsVisible Emissions"}, {"id": "work_area", "title": "Work Area", "type": "checklist", "parent": null, "questions": [{"text": "Is the restricted work area segregated with caution tape & Signs?", "yesField": "Check Box92.0.0", "noField": "Check Box92.0.1", "commentField": "Text100"}, {"text": "Are employees and others working and/or entering into the restricted work areas using required PPE?", "yesField": "Check Box92.1.0", "noField": "Check Box92.1.1", "commentField": "CommentsAre employees and others working andor entering into the restricted work areas using required PPE"}, {"text": "Inspection of the work area for any evidence of spillage or dust accumulation", "yesField": "Check Box92.2.0", "noField": "Check Box92.2.1", "commentField": "CommentsInspection of the work area for any evidence of spillage or dust accumulation"}]}, {"id": "decontamination_area", "title": "Decontamination Area", "type": "checklist", "parent": null, "questions": [{"text": "Inspection of the decontamination area for cleanliness and functionality of the wash station?", "yesField": "Check Box93.0.0", "noField": "Check Box93.0.1", "commentField": "Text99"}, {"text": "Inspection of the decon for soap, water, towels and clean work clothing?", "yesField": "Check Box93.1.0", "noField": "Check Box93.1.1", "commentField": "CommentsInspection of the decon for soap water towels and clean work clothing"}, {"text": "Did employees exposed above the PEL take showers at the end of the work day?", "yesField": "Check Box93.2.0", "noField": "Check Box93.2.1", "commentField": "CommentsDid employees exposed above the PEL take showers at the end of the work day"}, {"text": "Was dirty clothing sent to an offsite location for cleaning on this day?", "yesField": "Check Box93.3.0", "noField": "Check Box93.3.1", "commentField": "CommentsWas dirty clothing sent to an offsite location for cleaning on this day"}, {"text": "Was contaminated water shipped on this day?", "yesField": "Check Box93.4.0", "noField": "Check Box93.4.1", "commentField": "CommentsWas contaminated water shipped on this day"}, {"text": "Are Respirators being properly maintained, cleaned and stored?", "yesField": "Check Box93.5.0", "noField": "Check Box93.5.1", "commentField": "CommentsAre Respirators being properly maintained cleaned and stored"}]}, {"id": "waste_area", "title": "Waste Area", "type": "checklist", "parent": null, "questions": [{"text": "Is the hazardous waste area secure?", "yesField": "Check Box94.0.0", "noField": "Check Box94.0.1", "commentField": "Text98"}, {"text": "Is the hazardous waste properly stored?", "yesField": "Check Box94.1.0", "noField": "Check Box94.1.1", "commentField": "CommentsIs the hazardous waste properly stored"}, {"text": "Has any waste been stored over 60 days?", "yesField": "Check Box94.2.0", "noField": "Check Box94.2.1", "commentField": "CommentsHas any waste been stored over 60 days"}, {"text": "Was the hazardous waste area inspected for cleanliness and whether any additional clean-up required?", "yesField": "Check Box94.3.0", "noField": "Check Box94.3.1", "commentField": "CommentsWas the hazardous waste area inspected for cleanliness and whether any additional cleanup required"}, {"text": "Was hazardous waste shipped on this day?", "yesField": "Check Box94.4.0", "noField": "Check Box94.4.1", "commentField": "CommentsWas hazardous waste shipped on this day"}]}, {"id": "life_safety", "title": "Life Safety", "type": "checklist", "parent": null, "questions": [{"text": "Availability and functionality of safety and other equipment inside and outside of the containment?", "yesField": "Check Box95.0.0", "noField": "Check Box95.0.1", "commentField": "CommentsAvailability and functionality of safety and other equipment inside and outside of the containment"}, {"text": "Are first aid kits readily available at the work site?", "yesField": "Check Box95.1.0", "noField": "Check Box95.1.1", "commentField": "CommentsAre first aid kits readily available at the work site"}, {"text": "Testing and calibration check on CO monitors?", "yesField": "Check Box95.2.0", "noField": "Check Box95.2.1", "commentField": "CommentsTesting and calibration check on CO monitors"}, {"text": "Any accidents reported on this date?", "yesField": "Check Box95.3.0", "noField": "Check Box95.3.1", "commentField": "CommentsAny accidents reported on this date"}, {"text": "Any safety violations or warnings issued on this date?", "yesField": "Check Box95.4.0", "noField": "Check Box95.4.1", "commentField": "CommentsAny safety violations or warnings issued on this date"}]}, {"id": "testing", "title": "Testing", "type": "checklist", "parent": null, "questions": [{"text": "Have all workers received medical clearances (blood and fit tests) to wear a respirator and work with Lead?", "yesField": "Check Box96.0.0", "noField": "Check Box96.0.1", "commentField": "CommentsHave all workers received medical clearances blood and fit tests to wear a respirator and work with Lead"}, {"text": "Have all workers received annual lead training?", "yesField": "Check Box96.1.0", "noField": "Check Box96.1.1", "commentField": "CommentsHave all workers received annual lead training"}, {"text": "Any monitoring performed today (Air, Wipe, Water, Soil, Waste) Enter Date of when samples where sent for analysis__________", "yesField": "Check Box96.2.0", "noField": "Check Box96.2.1", "commentField": "CommentsAny monitoring performed today Air Wipe Water Soil Waste Enter Date of when samples where sent for analysis"}]}], "templatePdf": "dsif_template.pdf", "fields": {"project": "Project", "date": "Date", "print": "Print", "signatureRect": [351.928, 25.9628, 513.437, 43.6356], "attached": {"accident": "Check Box87", "incident": "Check Box88", "violation": "Check Box89"}}};
-
-let photos = []; // { id, catId, catTitle, dataUrl, w, h, mime }
-let currentPhotoCat = null;
-let sigDataUrl = null;
-
-// Attached Pages files (Accident/Incident/Violation)
-// { accident|incident|violation: { name, kind: 'pdf'|'image', mime, bytes?, dataUrl? } | null }
-let attachedPages = {
-  accident: null,
-  incident: null,
-  violation: null,
+const FORM_DEF = {
+  "templatePdf": "dsif_template.pdf",
+  "projectOptions": [
+    "  ",
+    "69th St. Transfer Bridge",
+    "BA-2024-RE-102-CM Mid-Hudson Bridge",
+    "BRX9579 - Boston Road Bridge",
+    "BW96 & VN12 - Whitestone Hellman Platforms",
+    "C35311 - Dyre Ave. Line",
+    "D214898 - TANE22-29 Restani T&M",
+    "D264324 - Westchester County Field Metalizing",
+    "D264965 - Highway bridge repair W&W",
+    "D265046 - Highway bridge repair W&W",
+    "D265307 - WO03",
+    "D265343 - Bove W&W 2",
+    "Devon Bridge",
+    "DMB-25-01",
+    "FCC 2056",
+    "Gold Star Memorial Bridge",
+    "Governors Island",
+    "Grand Concourse",
+    "GW 244.289 Lemoine Ave",
+    "GWB Cables",
+    "HB1070MD - Macombs Dam Bridge",
+    "HBKBQE - NYCDOT Bove",
+    "K7279 & K6176 Gordie Howe",
+    "Park Avenue",
+    "Pulaski 8B",
+    "QBB-2017",
+    "RK90",
+    "RK19-A",
+    "Sandy Relief",
+    "VN81X",
+    "VN-84B - Verrazzano Bridge Ramps Brooklyn",
+    "Warehouse"
+  ],
+  "weatherOptions": [
+    "  ",
+    "Sunny/Clear",
+    "Partly Cloudy",
+    "Overcast",
+    "Rain",
+    "Snow",
+    "Fog",
+    "Windy"
+  ],
+  "dayOptions": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ],
+  "shiftOptions": [
+    "Day",
+    "Night"
+  ],
+  "attachedPages": [
+    {
+      "key": "accident",
+      "label": "Accident Report"
+    },
+    {
+      "key": "incident",
+      "label": "Incident Report"
+    },
+    {
+      "key": "safety",
+      "label": "Safety Violation"
+    }
+  ],
+  "grid": {
+    "xYes": 312.972,
+    "xNo": 336.972,
+    "xComment0": 350.972,
+    "xComment1": 596.572
+  },
+  "headerCoords": {
+    "project": {
+      "x": 67.0,
+      "yCenter": 37.395254135131836
+    },
+    "reportDate": {
+      "x": 82.0,
+      "yCenter": 52.635244369506836
+    },
+    "day": {
+      "x": 210.0,
+      "yCenter": 52.635244369506836
+    },
+    "weather": {
+      "x": 380.0,
+      "yCenter": 51.915212631225586
+    },
+    "attachedMarks": {
+      "accident": {
+        "x": 92.73228454589844,
+        "yCenter": 68.59553527832031
+      },
+      "incident": {
+        "x": 164.25228881835938,
+        "yCenter": 68.59553527832031
+      },
+      "safety": {
+        "x": 235.7686767578125,
+        "yCenter": 68.59553527832031
+      }
+    }
+  },
+  "categories": [
+    {
+      "id": "platform",
+      "title": "Platform/Scaffold/Engineered Platform & Shield Systems",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "platform_1",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 100.184,
+          "yBottom": 123.104,
+          "question": "Is the platform/scaffold/engineered system fully decked, secured, and free of loose or missing components?",
+          "rowHeight": 22.92
+        },
+        {
+          "id": "platform_2",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 123.104,
+          "yBottom": 137.144,
+          "question": "Is platform deflection (sag) within allowable limits per approved plans?",
+          "rowHeight": 14.040000000000006
+        },
+        {
+          "id": "platform_3",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 137.144,
+          "yBottom": 160.064,
+          "question": "Are all anchors, outriggers, and chokers properly installed, secured, and not overloaded?",
+          "rowHeight": 22.919999999999987
+        },
+        {
+          "id": "platform_4",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 160.064,
+          "yBottom": 182.984,
+          "question": "Are fall protection systems in place, including guardrails or 100% tie-off, with properly rated anchor points (5,000 lbs or engineered) and appropriate lanyards/SRLs in use?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "platform_5",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 182.984,
+          "yBottom": 197.024,
+          "question": "Are all rigging hoists and braking systems operational?",
+          "rowHeight": 14.039999999999992
+        },
+        {
+          "id": "platform_6",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 197.024,
+          "yBottom": 211.064,
+          "question": "Has a functionality check been completed on all equipment prior to use?",
+          "rowHeight": 14.039999999999992
+        },
+        {
+          "id": "platform_7",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 211.064,
+          "yBottom": 225.104,
+          "question": "Is safe access provided to all platforms/scaffolds/engineered systems?",
+          "rowHeight": 14.04000000000002
+        },
+        {
+          "id": "platform_8",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 225.104,
+          "yBottom": 239.144,
+          "question": "Is the drop zone established and controlled?",
+          "rowHeight": 14.039999999999992
+        },
+        {
+          "id": "platform_9",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 239.144,
+          "yBottom": 262.064,
+          "question": "Are wind and weather conditions verified to be within allowable limits for work?",
+          "prompts": [
+            {
+              "key": "wind",
+              "label": "Wind Speed/Direction",
+              "x": 445.0586853027344,
+              "yCenter": 256.84645080566406
+            }
+          ],
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "platform_10",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 262.064,
+          "yBottom": 284.984,
+          "question": "Are approved plans for the platform/scaffold/engineered system available on site?",
+          "rowHeight": 22.91999999999996
+        },
+        {
+          "id": "platform_11",
+          "section": "platform",
+          "sectionTitle": "Platform/Scaffold/Engineered Platform & Shield Systems",
+          "page": 1,
+          "yTop": 284.984,
+          "yBottom": 307.904,
+          "question": "Has a competent person inspection been completed, and is the system approved for use?",
+          "rowHeight": 22.920000000000016
+        }
+      ]
+    },
+    {
+      "id": "blast",
+      "title": "Blast and Paint",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "blast_13",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 327.944,
+          "yBottom": 341.984,
+          "question": "Are blast hoods and required PPE in use and in serviceable condition?",
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "blast_14",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 341.984,
+          "yBottom": 364.904,
+          "question": "Are all hoses, couplings, whip checks, and fittings properly secured and in good condition?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "blast_15",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 364.904,
+          "yBottom": 387.824,
+          "question": "Are deadman controls installed on all blast hoses and functioning properly?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "blast_16",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 387.824,
+          "yBottom": 410.744,
+          "question": "Are spray guns equipped with required safety devices (e.g., tip guards/knuckle guards), and are safety locks functional?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "blast_17",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 410.744,
+          "yBottom": 433.664,
+          "question": "Are required filters (organic vapor and particulate) inspected and within their service life?",
+          "rowHeight": 22.91999999999996
+        },
+        {
+          "id": "blast_18",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 433.664,
+          "yBottom": 447.704,
+          "question": "Are VOC and LEL levels within specified limits?",
+          "prompts": [
+            {
+              "key": "specLimit",
+              "label": "Specification Limit",
+              "x": 432.45892333984375,
+              "yCenter": 442.48643493652344
+            }
+          ],
+          "rowHeight": 14.04000000000002
+        },
+        {
+          "id": "blast_19",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 447.704,
+          "yBottom": 470.624,
+          "question": "Is the air purifying system identified, and are filter change dates documented?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "blast_20",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 470.624,
+          "yBottom": 484.664,
+          "question": "Is a CO monitor present, calibrated, and functioning properly?",
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "blast_21",
+          "section": "blast",
+          "sectionTitle": "Blast and Paint",
+          "page": 1,
+          "yTop": 484.664,
+          "yBottom": 507.276,
+          "question": "Is all required monitoring equipment within calibration and verified operational (bump tested) prior to use?",
+          "rowHeight": 22.612000000000023
+        }
+      ]
+    },
+    {
+      "id": "decon",
+      "title": "Decontamination Area",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "decon_23",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 528.247,
+          "yBottom": 551.139,
+          "question": "Is a decontamination area/trailer present, accessible, and maintained in a clean and functional condition?",
+          "rowHeight": 22.892000000000053
+        },
+        {
+          "id": "decon_24",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 551.139,
+          "yBottom": 564.937,
+          "question": "Are employees utilizing handwashing stations prior to breaks?",
+          "rowHeight": 13.798000000000002
+        },
+        {
+          "id": "decon_25",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 564.937,
+          "yBottom": 587.857,
+          "question": "Does the decontamination trailer have required supplies (soap, water, towels, and clean work clothing)?",
+          "rowHeight": 22.91999999999996
+        },
+        {
+          "id": "decon_26",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 587.857,
+          "yBottom": 608.857,
+          "question": "Are employees exposed above the PEL utilizing shower facilities at the end of the work shift?",
+          "rowHeight": 21.0
+        },
+        {
+          "id": "decon_27",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 608.857,
+          "yBottom": 631.777,
+          "question": "Is contaminated (dirty) clothing handled, stored, and disposed of in accordance with project requirements?",
+          "rowHeight": 22.920000000000073
+        },
+        {
+          "id": "decon_28",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 631.777,
+          "yBottom": 654.697,
+          "question": "Are street clothes stored separately from contaminated work areas (clean side of decontamination area)?",
+          "rowHeight": 22.91999999999996
+        },
+        {
+          "id": "decon_29",
+          "section": "decon",
+          "sectionTitle": "Decontamination Area",
+          "page": 1,
+          "yTop": 654.697,
+          "yBottom": 668.737,
+          "question": "Are respirators properly maintained, cleaned, and stored?",
+          "rowHeight": 14.039999999999964
+        }
+      ]
+    },
+    {
+      "id": "waste",
+      "title": "Waste Area",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "waste_32",
+          "section": "waste",
+          "sectionTitle": "Waste Area",
+          "page": 1,
+          "yTop": 692.46,
+          "yBottom": 706.855,
+          "question": "Is the hazardous waste storage area secure and waste properly stored?",
+          "rowHeight": 14.394999999999982
+        },
+        {
+          "id": "waste_33",
+          "section": "waste",
+          "sectionTitle": "Waste Area",
+          "page": 1,
+          "yTop": 706.855,
+          "yBottom": 720.895,
+          "question": "Is wastewater and paint waste properly contained and stored?",
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "waste_34",
+          "section": "waste",
+          "sectionTitle": "Waste Area",
+          "page": 1,
+          "yTop": 720.895,
+          "yBottom": 734.935,
+          "question": "Has any hazardous waste exceeded allowable on-site storage time limits?",
+          "prompts": [
+            {
+              "key": "daysAllowed",
+              "label": "Specified days allowed",
+              "x": 450.0286560058594,
+              "yCenter": 729.7175598144531
+            }
+          ],
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "waste_35",
+          "section": "waste",
+          "sectionTitle": "Waste Area",
+          "page": 1,
+          "yTop": 734.935,
+          "yBottom": 748.975,
+          "question": "Was the hazardous waste storage area inspected for cleanliness?",
+          "rowHeight": 14.040000000000077
+        },
+        {
+          "id": "waste_36",
+          "section": "waste",
+          "sectionTitle": "Waste Area",
+          "page": 1,
+          "yTop": 748.975,
+          "yBottom": 763.015,
+          "question": "Was any hazardous waste shipped off-site on this date?",
+          "rowHeight": 14.039999999999964
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "title": "Work Area",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "work_0",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 64.531,
+          "yBottom": 87.451,
+          "question": "Is the restricted work area properly segregated with required barriers, caution tape, and signage?",
+          "rowHeight": 22.919999999999987
+        },
+        {
+          "id": "work_1",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 87.451,
+          "yBottom": 110.371,
+          "question": "Are employees and authorized personnel within restricted areas utilizing required PPE?",
+          "rowHeight": 22.92
+        },
+        {
+          "id": "work_2",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 110.371,
+          "yBottom": 133.291,
+          "question": "Is the work area free of visible spills or dust accumulation at the end of work inspection?",
+          "rowHeight": 22.92
+        },
+        {
+          "id": "work_3",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 133.291,
+          "yBottom": 147.331,
+          "question": "Are tools tethered where required?",
+          "rowHeight": 14.039999999999992
+        },
+        {
+          "id": "work_4",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 147.331,
+          "yBottom": 170.251,
+          "question": "Are extension cords and electrical tools free of damage (no exposed wires or splices), and are GFCIs in use where required?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "work_5",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 170.251,
+          "yBottom": 185.491,
+          "question": "Are work area walkways maintained free of debris and tripping hazards?",
+          "rowHeight": 15.240000000000009
+        },
+        {
+          "id": "work_6",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 185.491,
+          "yBottom": 208.411,
+          "question": "Are any pre-existing conditions observed that require documentation? (If yes, document and photograph.)",
+          "rowHeight": 22.919999999999987
+        },
+        {
+          "id": "work_7",
+          "section": "work",
+          "sectionTitle": "Work Area",
+          "page": 2,
+          "yTop": 208.411,
+          "yBottom": 222.451,
+          "question": "Are any other trades or operations working near the work area?",
+          "rowHeight": 14.039999999999992
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "title": "Life Safety",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "life_9",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 246.091,
+          "yBottom": 269.011,
+          "question": "Is required safety equipment (inside and outside containment) readily available and functional?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "life_10",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 269.011,
+          "yBottom": 292.291,
+          "question": "Are first aid kits, fire extinguishers, eye wash and emergency equipment present and readily accessible?",
+          "rowHeight": 23.279999999999973
+        },
+        {
+          "id": "life_11",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 292.291,
+          "yBottom": 311.731,
+          "question": "Are all required project plans (e.g., safety/work plans, waste management, rescue plans) available on site and implemented?",
+          "rowHeight": 19.439999999999998
+        },
+        {
+          "id": "life_12",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 311.731,
+          "yBottom": 334.051,
+          "question": "Are independent lifelines and rigging ropes in use, within rated capacity, and in good condition?",
+          "rowHeight": 22.319999999999993
+        },
+        {
+          "id": "life_13",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 334.051,
+          "yBottom": 348.091,
+          "question": "Was a daily toolbox talk conducted with crew attendance?",
+          "prompts": [
+            {
+              "key": "topic",
+              "label": "Topic",
+              "x": 402.934326171875,
+              "yCenter": 342.8669891357422
+            }
+          ],
+          "rowHeight": 14.04000000000002
+        },
+        {
+          "id": "life_14",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 348.091,
+          "yBottom": 362.131,
+          "question": "Were any incidents or accidents reported on this date?",
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "life_15",
+          "section": "life",
+          "sectionTitle": "Life Safety",
+          "page": 2,
+          "yTop": 362.131,
+          "yBottom": 376.171,
+          "question": "Were any verbal safety warnings issued on this date?",
+          "rowHeight": 14.04000000000002
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "testing_17",
+          "section": "testing",
+          "sectionTitle": "Testing",
+          "page": 2,
+          "yTop": 398.491,
+          "yBottom": 421.411,
+          "question": "Have all workers received medical clearance to wear a respirator and work with lead when applicable (including blood testing, respirator clearance and fit testing)?",
+          "rowHeight": 22.920000000000016
+        },
+        {
+          "id": "testing_18",
+          "section": "testing",
+          "sectionTitle": "Testing",
+          "page": 2,
+          "yTop": 421.411,
+          "yBottom": 435.451,
+          "question": "Have all workers received annual lead training?",
+          "rowHeight": 14.04000000000002
+        },
+        {
+          "id": "testing_19",
+          "section": "testing",
+          "sectionTitle": "Testing",
+          "page": 2,
+          "yTop": 435.451,
+          "yBottom": 450.263,
+          "question": "Was any monitoring performed today (e.g., air, wipe, water, soil, waste)?",
+          "prompts": [
+            {
+              "key": "chain",
+              "label": "Chain of Custody",
+              "x": 487.4205322265625,
+              "yCenter": 444.2660369873047
+            }
+          ],
+          "rowHeight": 14.811999999999955
+        }
+      ]
+    },
+    {
+      "id": "contain",
+      "title": "Containment",
+      "naLabel": "N/A",
+      "items": [
+        {
+          "id": "contain_21",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 474.817,
+          "yBottom": 497.663,
+          "question": "Is the containment system intact and functioning in accordance with approved plans (are joints sealed? openings closed? floor covering in place? make-up air inlets and airlock access points operational)?",
+          "rowHeight": 22.846000000000004
+        },
+        {
+          "id": "contain_22",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 497.663,
+          "yBottom": 520.583,
+          "question": "Were dust collectors and vacuum equipment operational throughout blasting activities?",
+          "rowHeight": 22.91999999999996
+        },
+        {
+          "id": "contain_23",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 520.583,
+          "yBottom": 543.503,
+          "question": "Was adequate airflow/venilation maintained throughout blasting operations?",
+          "rowHeight": 22.920000000000073
+        },
+        {
+          "id": "contain_24",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 543.503,
+          "yBottom": 557.543,
+          "question": "Was negative pressure maintained within the containment?",
+          "prompts": [
+            {
+              "key": "visual",
+              "label": "Visual/Magnehelic",
+              "x": 422.9374084472656,
+              "yCenter": 552.6115417480469
+            },
+            {
+              "key": "reading",
+              "label": "Reading",
+              "x": 543.4357299804688,
+              "yCenter": 552.6115417480469
+            }
+          ],
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "contain_25",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 557.543,
+          "yBottom": 571.583,
+          "question": "Were airflow checks performed as required?",
+          "prompts": [
+            {
+              "key": "method",
+              "label": "Method",
+              "x": 446.0760803222656,
+              "yCenter": 566.6515197753906
+            },
+            {
+              "key": "airflow",
+              "label": "Airflow Readings",
+              "x": 546.696044921875,
+              "yCenter": 566.6515197753906
+            }
+          ],
+          "rowHeight": 14.039999999999964
+        },
+        {
+          "id": "contain_26",
+          "section": "contain",
+          "sectionTitle": "Containment",
+          "page": 2,
+          "yTop": 571.583,
+          "yBottom": 585.623,
+          "question": "Was a final cleanup inspection of the containment performed?",
+          "prompts": [
+            {
+              "key": "cleaned",
+              "label": "Containment cleaned per spec",
+              "x": 517.5611572265625,
+              "yCenter": 578.7278747558594
+            }
+          ],
+          "rowHeight": 14.040000000000077
+        }
+      ]
+    }
+  ],
+  "visibleEmissions": {
+    "page": 2,
+    "naCapable": true,
+    "rows": [
+      {
+        "yTop": 600.863,
+        "yBottom": 616.103
+      },
+      {
+        "yTop": 616.103,
+        "yBottom": 631.343
+      }
+    ],
+    "cols": [
+      {
+        "key": "location",
+        "label": "Locations",
+        "x0": 348.972,
+        "x1": 456.252
+      },
+      {
+        "key": "time",
+        "label": "Time",
+        "x0": 456.252,
+        "x1": 492.492
+      },
+      {
+        "key": "obsPeriod",
+        "label": "Observation Period",
+        "x0": 492.492,
+        "x1": 539.572
+      },
+      {
+        "key": "emissionTime",
+        "label": "Emission Time",
+        "x0": 539.572,
+        "x1": 598.572
+      }
+    ]
+  },
+  "commentsCorrectionsBox": {
+    "page": 2,
+    "x0": 15.0,
+    "x1": 598.5,
+    "yTop": 663.0,
+    "yBottom": 700.0
+  },
+  "signatureCoords": {
+    "printName": {
+      "x": 150.45997619628906,
+      "yCenter": 709.3664245605469
+    },
+    "signatureBox": {
+      "x": 350.4884033203125,
+      "yTop": 703.5,
+      "yBottom": 727.0,
+      "xRight": 588.572
+    }
+  }
 };
 
-const ATTACHED_PAGE_DEFS = [
-  { key: 'accident', checkboxId: 'attAccident', label: 'Near Miss Report' },
-  { key: 'incident', checkboxId: 'attIncident', label: 'Incident Report' },
-  { key: 'violation', checkboxId: 'attViolation', label: 'Safety Violation' },
-];
-
-function $(id){ return document.getElementById(id); }
-
-function cryptoId(){
-  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  return String(Date.now()) + '_' + Math.random().toString(16).slice(2);
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-}
-
-function setTodayIfEmpty(input){
-  if (!input) return;
-  if (!input.value) {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    input.value = `${yyyy}-${mm}-${dd}`;
+const STATE = {
+  header: {
+    project: "",
+    projectCustom: "",
+    reportDate: "",
+    day: "",
+    shift: "",
+    weather: "",
+    weatherCustom: ""
+  },
+  attached: {
+    accident: null,
+    incident: null,
+    safety: null
+  },
+  categoryNA: {},
+  responses: {}, // itemId -> { answer: "yes"|"no"|"" , comment: "", prompts: {}, photos: [{dataUrl, mime, name}] }
+  visible: {
+    na: false,
+    rows: [
+      { location: "", time: "", obsPeriod: "", emissionTime: "" },
+      { location: "", time: "", obsPeriod: "", emissionTime: "" }
+    ]
+  },
+  commentsCorrections: "",
+  signature: {
+    printName: "",
+    dataUrl: "" // PNG data URL
   }
+};
+
+function $(id) { return document.getElementById(id); }
+
+function todayISO() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
-function formatMMDDYYYY(isoDate){
-  // isoDate: YYYY-MM-DD
-  if (!isoDate) return "";
-  const m = /^\d{4}-\d{2}-\d{2}$/.test(isoDate) ? isoDate : "";
-  if (!m) return "";
-  const [y,mo,d] = isoDate.split('-');
-  return `${mo}/${d}/${y}`;
+function fmtDateSlashes(iso) {
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-");
+  return `${m}/${d}/${y}`;
 }
 
-function init(){
-  renderTopProjectOptions();
-  wireProjectCustom();
-  renderCategories();
-  wireActionButtons();
-  wirePhotoInput();
-  wireAttachedPages();
-  initSignature();
-
-  setTodayIfEmpty($("fReportDate"));
-  updateAllPhotoBadges();
+function fmtDateDotsShort(iso) {
+  // MM.DD.YY
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-");
+  return `${m}.${d}.${String(y).slice(-2)}`;
 }
 
-function renderTopProjectOptions(){
-  const sel = $("fProject");
-  sel.innerHTML = "";
+function sanitizeFilePart(s) {
+  return (s || "")
+    .trim()
+    .replace(/[^\w.-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
 
-  // Clone options so we can safely augment them.
-  const opts = Array.isArray(FORM_DEF.projectOptions) ? [...FORM_DEF.projectOptions] : [];
+function getProjectValue() {
+  const sel = STATE.header.project;
+  if (sel === "__custom__") return (STATE.header.projectCustom || "").trim();
+  return (sel || "").trim();
+}
 
-  // Ensure a blank option exists at the top.
-  if (!opts.length || String(opts[0]).trim() !== "") {
-    opts.unshift("  ");
+function getWeatherValue() {
+  const sel = STATE.header.weather;
+  if (sel === "__custom__") return (STATE.header.weatherCustom || "").trim();
+  return (sel || "").trim();
+}
+
+function getNAStamp() {
+  const iso = STATE.header.reportDate || todayISO();
+  const dateStr = fmtDateSlashes(iso);
+  return `Not applicable for today ${dateStr}`;
+}
+
+function ensureItemState(itemId) {
+  if (!STATE.responses[itemId]) {
+    STATE.responses[itemId] = { answer: "", comment: "", prompts: {}, photos: [] };
   }
+  return STATE.responses[itemId];
+}
 
-  // Ensure RK19-A exists in the project dropdown.
-  const hasRK19A = opts.some(o => String(o).trim() === "RK19-A");
-  if (!hasRK19A) {
-    // Prefer inserting after RK90 if present; otherwise append.
-    const idx = opts.findIndex(o => String(o).trim() === "RK90");
-    if (idx >= 0) opts.splice(idx + 1, 0, "RK19-A");
-    else opts.push("RK19-A");
+function setHidden(el, hidden) {
+  if (!el) return;
+  el.classList.toggle("hidden", !!hidden);
+}
+
+function el(tag, attrs = {}, children = []) {
+  const node = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)) {
+    if (k === "class") node.className = v;
+    else if (k === "text") node.textContent = v;
+    else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) node.setAttribute(k, String(v));
   }
-
-  // If a prior custom project was entered, keep it available.
-  const lastCustom = (function(){
-    try { return (localStorage.getItem('dsif_project_custom') || '').trim(); }
-    catch(e){ return ""; }
-  })();
-  if (lastCustom && !opts.some(o => String(o).trim() === lastCustom)) {
-    opts.push(lastCustom);
+  for (const child of children) {
+    if (child === null || child === undefined) continue;
+    if (typeof child === "string") node.appendChild(document.createTextNode(child));
+    else node.appendChild(child);
   }
-
-  // Render base options.
-  for (const opt of opts){
-    const o = document.createElement('option');
-    o.value = opt;
-    o.textContent = opt.trim() ? opt : "";
-    sel.appendChild(o);
-  }
-
-  // Add Custom entry option at the end.
-  const custom = document.createElement('option');
-  custom.value = "__CUSTOM__";
-  custom.textContent = "Custom…";
-  sel.appendChild(custom);
+  return node;
 }
 
-function wireProjectCustom(){
-  const sel = $("fProject");
-  if (!sel) return;
-
-  sel.addEventListener('change', function(){
-    if (sel.value !== "__CUSTOM__") return;
-
-    let prev = "";
-    try { prev = (localStorage.getItem('dsif_project_custom') || '').trim(); } catch(e) { prev = ""; }
-
-    const entered = window.prompt("Enter project name", prev);
-
-    if (entered && entered.trim()) {
-      const val = entered.trim();
-
-      try { localStorage.setItem('dsif_project_custom', val); } catch(e) {}
-
-      // If the option doesn't exist yet, insert it just before Custom…
-      let opt = Array.from(sel.options).find(o => o.value === val);
-      if (!opt){
-        opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val;
-        // Insert before the Custom… option
-        const customOpt = sel.querySelector('option[value="__CUSTOM__"]');
-        if (customOpt) sel.insertBefore(opt, customOpt);
-        else sel.appendChild(opt);
-      }
-
-      sel.value = val;
-    } else {
-      // Revert to blank.
-      sel.selectedIndex = 0;
-    }
-  });
-}
-
-function wireActionButtons(){
-  // Bind all reset/save buttons (top + bottom).
-  // Prefer data-action, but also fall back to known IDs for backward compatibility.
-  const resetEls = new Set([
-    ...Array.from(document.querySelectorAll('[data-action="reset"]')),
-    $("btnReset"),
-    $("btnResetBottom"),
-  ].filter(Boolean));
-
-  const saveEls = new Set([
-    ...Array.from(document.querySelectorAll('[data-action="save"]')),
-    $("btnSave"),
-    $("btnSaveBottom"),
-  ].filter(Boolean));
-
-  resetEls.forEach(b => b.addEventListener('click', resetAll));
-  saveEls.forEach(b => b.addEventListener('click', savePdf));
-}
-
-function wireAttachedPages(){
-  let input = $("attachInput");
-  // Backward compatible: if the HTML input doesn't exist, create it.
-  if (!input){
-    input = document.createElement('input');
-    input.id = 'attachInput';
-    input.type = 'file';
-    input.accept = 'application/pdf,image/*';
-    input.className = 'hidden';
-    document.body.appendChild(input);
-  }
-
-  let pendingKey = null;
-
-  function setFileLabel(key){
-    let el = $("attFile_" + key);
-    if (!el){
-      // If not present, create a label span next to the checkbox for this attachment.
-      const def = ATTACHED_PAGE_DEFS.find(d => d.key === key);
-      const cb = def ? $(def.checkboxId) : null;
-      const wrap = cb ? cb.closest('label') : null;
-      if (wrap){
-        el = document.createElement('span');
-        el.id = 'attFile_' + key;
-        el.className = 'att-file';
-        el.title = 'Tap to change attached file';
-        wrap.appendChild(el);
-      }
-    }
-    if (!el) return;
-    const item = attachedPages[key];
-    if (item && item.name){
-      el.textContent = item.name;
-      el.classList.add('has-file');
-    } else {
-      el.textContent = '';
-      el.classList.remove('has-file');
-    }
-  }
-
-  function openPickerFor(key){
-    pendingKey = key;
-    input.value = ''; // allow re-selecting same file
-    input.click();
-  }
-
-  // Checkbox behavior: checking prompts a file chooser
-  for (const def of ATTACHED_PAGE_DEFS){
-    const cb = $(def.checkboxId);
-    if (!cb) continue;
-
-    cb.addEventListener('change', () => {
-      if (cb.checked){
-        openPickerFor(def.key);
-      } else {
-        attachedPages[def.key] = null;
-        setFileLabel(def.key);
-      }
-    });
-
-    setFileLabel(def.key);
-
-    // Tapping the filename allows replacing the attached file
-    const labelEl = $("attFile_" + def.key);
-    if (labelEl && !labelEl.dataset.wired){
-      labelEl.dataset.wired = '1';
-      labelEl.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (cb.checked){
-          openPickerFor(def.key);
-        }
-      });
-    }
-  }
-
-  input.addEventListener('change', async () => {
-    if (!pendingKey) return;
-
-    const def = ATTACHED_PAGE_DEFS.find(d => d.key === pendingKey);
-    const cb = def ? $(def.checkboxId) : null;
-
-    const file = (input.files && input.files[0]) ? input.files[0] : null;
-    if (!file){
-      // User canceled -> uncheck and clear
-      if (cb) cb.checked = false;
-      attachedPages[pendingKey] = null;
-      setFileLabel(pendingKey);
-      pendingKey = null;
-      return;
-    }
-
-    try{
-      if (String(file.type).toLowerCase() === 'application/pdf'){
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        attachedPages[pendingKey] = { name: file.name, kind: 'pdf', mime: file.type, bytes };
-      } else if (String(file.type).toLowerCase().startsWith('image/')){
-        // Convert to JPEG for consistent PDF embedding
-        const scaled = await readAndDownscaleImage(file, 2200, 0.88);
-        attachedPages[pendingKey] = { name: file.name, kind: 'image', mime: 'image/jpeg', dataUrl: scaled.dataUrl };
-      } else {
-        alert('Unsupported file type. Please attach a PDF or an image.');
-        if (cb) cb.checked = false;
-        attachedPages[pendingKey] = null;
-      }
-    } catch(err){
-      console.warn('Could not attach file', err);
-      alert('Could not attach that file. Try a PDF or a photo from your device.');
-      if (cb) cb.checked = false;
-      attachedPages[pendingKey] = null;
-    }
-
-    setFileLabel(pendingKey);
-    pendingKey = null;
-  });
-}
-
-function renderCategories(){
-  const host = $("categories");
-  host.innerHTML = "";
-
-  for (const cat of FORM_DEF.categories){
-    const wrap = document.createElement('div');
-    wrap.className = 'cat';
-    wrap.dataset.catId = cat.id;
-
-    // Header
-    const header = document.createElement('div');
-    header.className = 'cat-header';
-
-    const toggleBtn = document.createElement('button');
-    toggleBtn.type = 'button';
-    toggleBtn.className = 'cat-toggle';
-
-    const chevron = document.createElement('div');
-    chevron.className = 'cat-chevron';
-    chevron.textContent = '▾';
-
-    const title = document.createElement('div');
-    title.className = 'cat-title';
-    title.textContent = cat.title;
-
-    toggleBtn.appendChild(chevron);
-    toggleBtn.appendChild(title);
-
-    const actions = document.createElement('div');
-    actions.className = 'cat-actions';
-
-    // N/A
-    const naLabel = document.createElement('label');
-    naLabel.className = 'cat-na';
-    naLabel.innerHTML = `<input type="checkbox" id="na_${escapeHtml(cat.id)}"/> <span>N/A</span>`;
-    actions.appendChild(naLabel);
-
-    // Attach photos
-    const attachBtn = document.createElement('button');
-    attachBtn.type = 'button';
-    attachBtn.className = 'btn';
-    attachBtn.style.padding = '10px 10px';
-    attachBtn.textContent = 'Attach';
-    attachBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openPhotoPicker(cat.id, cat.title);
-    });
-    actions.appendChild(attachBtn);
-
-    // Photo count
-    const badge = document.createElement('div');
-    badge.className = 'badge';
-    badge.textContent = '0';
-    badge.dataset.role = 'photoCount';
-    actions.appendChild(badge);
-
-    header.appendChild(toggleBtn);
-    header.appendChild(actions);
-
-    // Body
-    const body = document.createElement('div');
-    body.className = 'cat-body';
-    body.dataset.role = 'body';
-
-    if (cat.type === 'visible_emissions'){
-      body.appendChild(renderVisibleEmissions(cat));
-    } else {
-      (cat.questions || []).forEach((q, idx) => {
-        body.appendChild(renderQuestion(cat, q, idx));
-      });
-    }
-
-    // Thumbnails row
-    const thumbs = document.createElement('div');
-    thumbs.className = 'thumb-row';
-    thumbs.dataset.role = 'thumbRow';
-    body.appendChild(thumbs);
-
-    // Wire toggle
-    toggleBtn.addEventListener('click', () => {
-      const na = $(`na_${cat.id}`);
-      if (na && na.checked) return; // N/A keeps it collapsed
-      body.classList.toggle('hidden');
-      chevron.textContent = body.classList.contains('hidden') ? '▸' : '▾';
-    });
-
-    // Wire N/A
-    const naCb = naLabel.querySelector('input');
-    naCb.addEventListener('change', () => {
-      const isNA = naCb.checked;
-      if (isNA){
-        body.classList.add('hidden');
-        chevron.textContent = '▸';
-      }
-    });
-
-    wrap.appendChild(header);
-    wrap.appendChild(body);
-    host.appendChild(wrap);
-
-    // initial collapsed state: expanded
-    body.classList.remove('hidden');
-    chevron.textContent = '▾';
-  }
-}
-
-function renderQuestion(cat, q, idx){
-  const row = document.createElement('div');
-  row.className = 'q';
-
-  const t = document.createElement('div');
-  t.className = 'q-text';
-  t.textContent = q.text;
-  row.appendChild(t);
-
-  const yn = document.createElement('div');
-  yn.className = 'yn';
-
-  const yes = makeYNButton(cat.id, idx, 'Yes');
-  const no = makeYNButton(cat.id, idx, 'No');
-
-  yn.appendChild(yes);
-  yn.appendChild(no);
-  row.appendChild(yn);
-
-  const c = document.createElement('div');
-  c.className = 'comment';
-  c.innerHTML = `<input id="cmt_${escapeHtml(cat.id)}_${idx}" type="text" placeholder="Comments (optional)" maxlength="80"/>`;
-  row.appendChild(c);
-
-  return row;
-}
-
-function makeYNButton(catId, idx, val){
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'yn-btn';
-  b.textContent = val;
-  b.dataset.catId = catId;
-  b.dataset.qIdx = String(idx);
-  b.dataset.val = val;
-
-  b.addEventListener('click', () => {
-    const na = $(`na_${catId}`);
-    if (na && na.checked) return;
-
-    const parent = b.parentElement;
-    parent.querySelectorAll('.yn-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-  });
-
-  return b;
-}
-
-function renderVisibleEmissions(cat){
-  const box = document.createElement('div');
-
-  const note = document.createElement('div');
-  note.className = 'small-note';
-  note.style.margin = '10px 0 12px 0';
-  note.textContent = 'Up to two visible emission observations (matches the original DSIF layout).';
-  box.appendChild(note);
-
-  const makeRow = (n, label) => {
-    const card = document.createElement('div');
-    card.style.border = '1px solid var(--border)';
-    card.style.borderRadius = '14px';
-    card.style.padding = '12px';
-    card.style.margin = '10px 0';
-
-    const title = document.createElement('div');
-    title.style.fontWeight = '900';
-    title.style.marginBottom = '8px';
-    title.textContent = label;
-    card.appendChild(title);
-
-    const grid1 = document.createElement('div');
-    grid1.className = 'grid-2';
-    grid1.innerHTML = `
-      <label class="field"><span class="label">Location</span><input id="ve_loc_${n}" type="text" placeholder="Location" maxlength="40"/></label>
-      <label class="field"><span class="label">Time</span><input id="ve_time_${n}" type="time"/></label>
-    `;
-    card.appendChild(grid1);
-
-    const grid2 = document.createElement('div');
-    grid2.className = 'grid-2';
-    grid2.innerHTML = `
-      <label class="field"><span class="label">Observation Period</span><input id="ve_obs_${n}" type="text" placeholder="e.g. 10 min" maxlength="30"/></label>
-      <label class="field"><span class="label">Emission Time</span><input id="ve_em_${n}" type="text" placeholder="e.g. 2 min" maxlength="30"/></label>
-    `;
-    card.appendChild(grid2);
-
-    return card;
-  };
-
-  box.appendChild(makeRow(1, 'Observation 1'));
-  box.appendChild(makeRow(2, 'Observation 2'));
-
-  const c = document.createElement('label');
-  c.className = 'field';
-  c.innerHTML = `<span class="label">Comments / Corrections</span>`;
-  const ta = document.createElement('textarea');
-  ta.id = 've_comments';
-  ta.rows = 3;
-  ta.placeholder = 'Comments / Corrections (optional)';
-  ta.maxLength = 120;
-  c.appendChild(ta);
-  box.appendChild(c);
-
-  return box;
-}
-
-function openPhotoPicker(catId, catTitle){
-  currentPhotoCat = { id: catId, title: catTitle };
-  const inp = $("photoInput");
-  inp.value = "";
-  inp.click();
-}
-
-function wirePhotoInput(){
-  $("photoInput").addEventListener('change', async (e) => {
-    if (!currentPhotoCat) return;
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    for (const file of files){
-      try{
-        const scaled = await readAndDownscaleImage(file, 1600, 0.86);
-        photos.push({
-          id: cryptoId(),
-          catId: currentPhotoCat.id,
-          catTitle: currentPhotoCat.title,
-          dataUrl: scaled.dataUrl,
-          w: scaled.w,
-          h: scaled.h,
-          mime: scaled.mime
-        });
-      } catch(err){
-        console.warn('Could not load image', err);
-      }
-    }
-
-    updateCategoryThumbs(currentPhotoCat.id);
-    updateAllPhotoBadges();
-  });
-}
-
-async function readAndDownscaleImage(file, maxDim=1600, jpegQuality=0.86){
-  const dataUrl = await readFileAsDataUrl(file);
-  const img = await loadImage(dataUrl);
-
-  let w = img.width;
-  let h = img.height;
-  const s = Math.min(1, maxDim / Math.max(w, h));
-  const outW = Math.max(1, Math.round(w * s));
-  const outH = Math.max(1, Math.round(h * s));
-
-  const canvas = document.createElement('canvas');
-  canvas.width = outW;
-  canvas.height = outH;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, outW, outH);
-
-  // Always export as JPEG to keep PDFs smaller
-  const outDataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
-  return { dataUrl: outDataUrl, w: outW, h: outH, mime: 'image/jpeg' };
-}
-
-function loadImage(dataUrl){
+async function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = dataUrl;
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Failed reading file"));
+    reader.readAsDataURL(file);
   });
 }
 
-function readFileAsDataUrl(file){
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-
-function updateAllPhotoBadges(){
-  document.querySelectorAll('.cat').forEach(catEl => {
-    const catId = catEl.dataset.catId;
-    const count = photos.filter(p => p.catId === catId).length;
-    const badge = catEl.querySelector('[data-role="photoCount"]');
-    if (badge) badge.textContent = String(count);
-    updateCategoryThumbs(catId);
-  });
-}
-
-function updateCategoryThumbs(catId){
-  const catEl = document.querySelector(`.cat[data-cat-id="${CSS.escape(catId)}"]`);
-  if (!catEl) return;
-  const row = catEl.querySelector('[data-role="thumbRow"]');
-  if (!row) return;
-
-  row.innerHTML = '';
-  const list = photos.filter(p => p.catId === catId);
-  for (const p of list){
-    const wrap = document.createElement('div');
-    wrap.className = 'thumb-wrap';
-
-    const img = document.createElement('img');
-    img.className = 'thumb';
-    img.src = p.dataUrl;
-    img.alt = `${p.catTitle} photo`;
-
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.className = 'thumb-del';
-    del.textContent = '×';
-    del.addEventListener('click', (e) => {
-      e.stopPropagation();
-      photos = photos.filter(x => x.id !== p.id);
-      updateCategoryThumbs(catId);
-      updateAllPhotoBadges();
-    });
-
-    wrap.appendChild(img);
-    wrap.appendChild(del);
-    row.appendChild(wrap);
-  }
-}
-
-function resetAll(){
-  if (!confirm('Reset this form? This clears all selections, comments, photos, and signature.')) return;
-
-  $("fProject").selectedIndex = 0;
-  $("fReportDate").value = '';
-  setTodayIfEmpty($("fReportDate"));
-
-  $("attAccident").checked = false;
-  $("attIncident").checked = false;
-  $("attViolation").checked = false;
-
-  // Clear any uploaded "Attached Pages" documents
-  attachedPages.accident = null;
-  attachedPages.incident = null;
-  attachedPages.violation = null;
-  // Clear labels if present
-  const lfA = $("attFile_accident"); if (lfA){ lfA.textContent=''; lfA.classList.remove('has-file'); }
-  const lfI = $("attFile_incident"); if (lfI){ lfI.textContent=''; lfI.classList.remove('has-file'); }
-  const lfV = $("attFile_violation"); if (lfV){ lfV.textContent=''; lfV.classList.remove('has-file'); }
-
-  // Categories
-  for (const cat of FORM_DEF.categories){
-    const na = $(`na_${cat.id}`);
-    if (na) na.checked = false;
-
-    const catEl = document.querySelector(`.cat[data-cat-id="${CSS.escape(cat.id)}"]`);
-    if (!catEl) continue;
-    const body = catEl.querySelector('[data-role="body"]');
-    const chev = catEl.querySelector('.cat-chevron');
-    if (body){ body.classList.remove('hidden'); }
-    if (chev){ chev.textContent = '▾'; }
-
-    if (cat.type === 'visible_emissions'){
-      $("ve_loc_1").value = '';
-      $("ve_time_1").value = '';
-      $("ve_obs_1").value = '';
-      $("ve_em_1").value = '';
-      $("ve_loc_2").value = '';
-      $("ve_time_2").value = '';
-      $("ve_obs_2").value = '';
-      $("ve_em_2").value = '';
-      $("ve_comments").value = '';
-    } else {
-      (cat.questions || []).forEach((q, idx) => {
-        document.querySelectorAll(`.yn-btn[data-cat-id="${CSS.escape(cat.id)}"][data-q-idx="${idx}"]`).forEach(b => b.classList.remove('active'));
-        const c = $(`cmt_${cat.id}_${idx}`);
-        if (c) c.value = '';
-      });
-    }
-  }
-
-  // Bottom
-  $("fPrintName").value = '';
-  sigDataUrl = null;
-  clearCanvas($("sigPreview"));
-  const hint = document.querySelector('.sig-hint');
-  if (hint) hint.style.display = '';
-
-  photos = [];
-  updateAllPhotoBadges();
-}
-
-function getYNValue(catId, idx){
-  const btn = document.querySelector(`.yn-btn.active[data-cat-id="${CSS.escape(catId)}"][data-q-idx="${idx}"]`);
-  return btn ? btn.dataset.val : '';
-}
-
-function getCommentValue(catId, idx){
-  const el = $(`cmt_${catId}_${idx}`);
-  return el ? (el.value || '').trim() : '';
-}
-
-function getCategoryNA(catId){
-  const na = $(`na_${catId}`);
-  return !!(na && na.checked);
-}
-
-async function savePdf(){
-  const saveButtons = new Set([
-    ...Array.from(document.querySelectorAll('[data-action="save"]')),
-    $("btnSave"),
-    $("btnSaveBottom"),
-  ].filter(Boolean));
-
-  const saveButtonsArr = Array.from(saveButtons);
-  saveButtonsArr.forEach(b => {
-    b.disabled = true;
-    b.dataset.oldText = b.textContent;
-    b.textContent = 'Saving…';
-  });
-
-  try{
-    const templateBytes = await fetch(FORM_DEF.templatePdf).then(r => r.arrayBuffer());
-    const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
-    const form = pdfDoc.getForm();
-
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-
-    // --- Top fields ---
-    const proj = ($("fProject").value || '').trim();
-    safeSelectDropdown(form, FORM_DEF.fields.project, proj);
-
-    // Use the form's report date for stamping N/A comments; fallback to today's date
-    const reportIso = $("fReportDate").value || new Date().toISOString().slice(0,10);
-    const reportText = formatMMDDYYYY(reportIso);
-    const naStamp = `Not applicable for today ${reportText}`;
-    safeSetText(form, FORM_DEF.fields.date, reportText);
-
-    safeSetCheckbox(form, FORM_DEF.fields.attached.accident, $("attAccident").checked);
-    safeSetCheckbox(form, FORM_DEF.fields.attached.incident, $("attIncident").checked);
-    safeSetCheckbox(form, FORM_DEF.fields.attached.violation, $("attViolation").checked);
-
-    // --- Categories ---
-    for (const cat of FORM_DEF.categories){
-      const isNA = getCategoryNA(cat.id);
-
-      if (cat.type === 'visible_emissions'){
-        if (isNA){
-          // Clear fields, set comments to N/A
-          for (const row of cat.rows){
-            safeSetText(form, row.locationsField, '');
-            safeSetText(form, row.timeField, '');
-            safeSetText(form, row.observationField, '');
-            safeSetText(form, row.emissionField, '');
-          }
-          safeSetText(form, cat.commentsField, naStamp);
-        } else {
-          safeSetText(form, cat.rows[0].locationsField, ($("ve_loc_1").value || '').trim());
-          safeSetText(form, cat.rows[0].timeField, ($("ve_time_1").value || '').trim());
-          safeSetText(form, cat.rows[0].observationField, ($("ve_obs_1").value || '').trim());
-          safeSetText(form, cat.rows[0].emissionField, ($("ve_em_1").value || '').trim());
-
-          safeSetText(form, cat.rows[1].locationsField, ($("ve_loc_2").value || '').trim());
-          safeSetText(form, cat.rows[1].timeField, ($("ve_time_2").value || '').trim());
-          safeSetText(form, cat.rows[1].observationField, ($("ve_obs_2").value || '').trim());
-          safeSetText(form, cat.rows[1].emissionField, ($("ve_em_2").value || '').trim());
-
-          safeSetText(form, cat.commentsField, ($("ve_comments").value || '').trim());
-        }
-
-        continue;
-      }
-
-      // checklist type
-      const qs = cat.questions || [];
-      if (isNA){
-        // Uncheck everything; stamp every comment cell so the saved PDF clearly shows N/A for this category
-        qs.forEach((q, idx) => {
-          safeSetCheckbox(form, q.yesField, false);
-          safeSetCheckbox(form, q.noField, false);
-          safeSetText(form, q.commentField, naStamp);
-        });
-      } else {
-        qs.forEach((q, idx) => {
-          const val = getYNValue(cat.id, idx);
-          const comment = getCommentValue(cat.id, idx);
-
-          safeSetCheckbox(form, q.yesField, val === 'Yes');
-          safeSetCheckbox(form, q.noField, val === 'No');
-          safeSetText(form, q.commentField, comment);
-        });
-      }
-    }
-
-    // --- Bottom fields ---
-    safeSetText(form, FORM_DEF.fields.print, ($("fPrintName").value || '').trim());
-
-    // Update field appearances so values are visible everywhere
-    try{
-      form.updateFieldAppearances(font);
-    } catch(e){
-      // ignore
-    }
-
-    // Flatten to lock in appearance and remove interactive widgets
-    try{
-      form.flatten();
-    } catch(e){
-      // ignore
-    }
-
-    // Signature: draw image on first page (Option B)
-    if (sigDataUrl){
-      const sigBytes = dataUrlToUint8Array(sigDataUrl);
-      const sigImg = await pdfDoc.embedPng(sigBytes);
-      const page = pdfDoc.getPages()[0];
-      const [x0,y0,x1,y1] = FORM_DEF.fields.signatureRect;
-      const boxW = x1-x0;
-      const boxH = y1-y0;
-      const pad = 1.0;
-
-      const maxW = Math.max(1, boxW - pad*2);
-      const maxH = Math.max(1, boxH - pad*2);
-
-      const s = Math.min(maxW / sigImg.width, maxH / sigImg.height);
-      const drawW = sigImg.width * s;
-      const drawH = sigImg.height * s;
-      const x = x0 + (boxW - drawW)/2;
-      const y = y0 + (boxH - drawH)/2;
-      page.drawImage(sigImg, { x, y, width: drawW, height: drawH });
-    }
-
-    // Attached Pages documents (Accident/Incident/Violation)
-    // If a checkbox is checked, the corresponding uploaded file is appended after the DSIF page.
-    for (const def of ATTACHED_PAGE_DEFS){
-      const cb = $(def.checkboxId);
-      if (!cb || !cb.checked) continue;
-      const item = attachedPages[def.key];
-      if (!item) continue;
-
-      if (item.kind === 'pdf' && item.bytes){
-        try{
-          // Insert a header page before the PDF pages
-          {
-            const page = pdfDoc.addPage([612, 792]);
-            const pageH = page.getHeight();
-            const margin = 36;
-
-            page.drawText(`${def.label} attachment`, { x: margin, y: pageH - margin - 18, size: 16, font });
-            if (item.name){
-              const safeName = String(item.name).slice(0, 80);
-              page.drawText(safeName, { x: margin, y: pageH - margin - 38, size: 10, font });
-            }
-          }
-
-          const srcDoc = await PDFLib.PDFDocument.load(item.bytes);
-          const indices = srcDoc.getPageIndices();
-          const copied = await pdfDoc.copyPages(srcDoc, indices);
-          copied.forEach(p => pdfDoc.addPage(p));
-        } catch(e){
-          console.warn('Could not append attached PDF', e);
-        }
-      } else if (item.kind === 'image' && item.dataUrl){
-        try{
-          const page = pdfDoc.addPage([612, 792]);
-          const pageW = page.getWidth();
-          const pageH = page.getHeight();
-          const margin = 36;
-
-          page.drawText(`${def.label} attachment`, { x: margin, y: pageH - margin - 18, size: 16, font });
-          if (item.name){
-            const safeName = String(item.name).slice(0, 80);
-            page.drawText(safeName, { x: margin, y: pageH - margin - 38, size: 10, font });
-          }
-
-          const headerH = 44;
-          const maxW = pageW - margin*2;
-          const maxH = pageH - (margin + headerH) - margin;
-
-          const imgBytes = dataUrlToUint8Array(item.dataUrl);
-          const img = await pdfDoc.embedJpg(imgBytes);
-
-          const s = Math.min(maxW / img.width, maxH / img.height);
-          const drawW = img.width * s;
-          const drawH = img.height * s;
-          const x = margin + (maxW - drawW)/2;
-          const y = margin;
-          page.drawImage(img, { x, y, width: drawW, height: drawH });
-        } catch(e){
-          console.warn('Could not append attached image', e);
-        }
-      }
-    }
-
-    // Photo pages
-    const photoList = photos.slice();
-    for (const p of photoList){
-      const page = pdfDoc.addPage([612, 792]);
-      const pageW = page.getWidth();
-      const pageH = page.getHeight();
-      const margin = 36;
-
-      page.drawText(`${p.catTitle} photos`, {
-        x: margin,
-        y: pageH - margin - 18,
-        size: 16,
-        font,
-      });
-
-      const headerH = 44;
-      const maxW = pageW - margin*2;
-      const maxH = pageH - (margin + headerH) - margin;
-
-      const imgBytes = dataUrlToUint8Array(p.dataUrl);
-      const img = await pdfDoc.embedJpg(imgBytes);
-
-      const s = Math.min(maxW / img.width, maxH / img.height);
-      const drawW = img.width * s;
-      const drawH = img.height * s;
-      const x = margin + (maxW - drawW)/2;
-      const y = margin;
-      page.drawImage(img, { x, y, width: drawW, height: drawH });
-    }
-
-    const outBytes = await pdfDoc.save();
-    const blob = new Blob([outBytes], { type: 'application/pdf' });
-
-    const fileName = buildPdfFileName();
-    downloadBlob(blob, fileName);
-
-  } catch(err){
-    console.error(err);
-    alert('Could not generate the PDF. If you attached many large photos, try fewer photos.');
-  } finally {
-    saveButtonsArr.forEach(b => {
-      b.disabled = false;
-      b.textContent = b.dataset.oldText || 'Save PDF';
-      delete b.dataset.oldText;
-    });
-  }
-}
-
-function buildPdfFileName(){
-  const proj = ($("fProject").value || '').trim();
-  const d = $("fReportDate").value || new Date().toISOString().slice(0,10);
-  const safeProj = proj.replace(/[^\w\-]+/g, '_').replace(/_+/g,'_').slice(0, 30);
-  return `DSIF_${d}${safeProj ? '_' + safeProj : ''}.pdf`;
-}
-
-function downloadBlob(blob, fileName){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-}
-
-function safeSetText(form, fieldName, value){
-  if (!fieldName) return;
-  try{
-    const f = form.getTextField(fieldName);
-    f.setText(value || '');
-  } catch(e){
-    // ignore
-  }
-}
-
-function safeSelectDropdown(form, fieldName, value){
-  if (!fieldName) return;
-  try{
-    const dd = form.getDropdown(fieldName);
-    if (value){
-      // If the value is not already an allowed option, add it (enables custom project text).
-      try{
-        const opts = dd.getOptions ? dd.getOptions() : [];
-        const has = Array.isArray(opts) && opts.some(x => String(x) === String(value));
-        if (!has && dd.addOptions){
-          dd.addOptions([String(value)]);
-        }
-      } catch(e) {
-        // ignore
-      }
-
-      dd.select(String(value));
-    } else {
-      // try to select blank option if present
-      const opts = dd.getOptions();
-      const blank = opts.find(x => !String(x).trim());
-      if (blank !== undefined) dd.select(blank);
-    }
-  } catch(e){
-    // ignore
-  }
-}
-
-function safeSetCheckbox(form, fieldName, checked){
-  if (!fieldName) return;
-  try{
-    const cb = form.getCheckBox(fieldName);
-    if (checked) cb.check();
-    else cb.uncheck();
-  } catch(e){
-    // ignore
-  }
-}
-
-function dataUrlToUint8Array(dataUrl){
-  const base64 = dataUrl.split(',')[1] || '';
-  const bin = atob(base64);
-  const len = bin.length;
-  const bytes = new Uint8Array(len);
-  for (let i=0;i<len;i++) bytes[i] = bin.charCodeAt(i);
+function dataUrlToUint8(dataUrl) {
+  const parts = dataUrl.split(",");
+  const b64 = parts[1] || "";
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 }
 
-/* Signature modal (Option B: draw) */
-function initSignature(){
-  const openBtn = $("sigOpen");
+function mimeFromDataUrl(dataUrl) {
+  const m = /^data:([^;]+);base64,/.exec(dataUrl);
+  return m ? m[1] : "application/octet-stream";
+}
+
+function getFileExtFromMime(mime) {
+  if (mime === "image/png") return "png";
+  if (mime === "image/jpeg") return "jpg";
+  if (mime === "application/pdf") return "pdf";
+  return "bin";
+}
+
+function setupHeader() {
+  // project
+  const projSel = $("projectSelect");
+  projSel.innerHTML = "";
+  for (const opt of FORM_DEF.projectOptions) {
+    projSel.appendChild(el("option", { value: opt, text: opt }));
+  }
+  projSel.appendChild(el("option", { value: "__custom__", text: "Custom..." }));
+  projSel.addEventListener("change", () => {
+    STATE.header.project = projSel.value;
+    setHidden($("projectCustomRow"), projSel.value !== "__custom__");
+  });
+
+  $("projectCustom").addEventListener("input", (e) => {
+    STATE.header.projectCustom = e.target.value;
+  });
+
+  // date
+  const dateEl = $("reportDate");
+  dateEl.value = todayISO();
+  STATE.header.reportDate = dateEl.value;
+  dateEl.addEventListener("change", () => {
+    STATE.header.reportDate = dateEl.value;
+  });
+
+  // day dropdown
+  const daySel = $("daySelect");
+  daySel.innerHTML = "";
+  daySel.appendChild(el("option", { value: "", text: " " }));
+  for (const opt of FORM_DEF.dayOptions) {
+    daySel.appendChild(el("option", { value: opt, text: opt }));
+  }
+  daySel.addEventListener("change", () => {
+    STATE.header.day = daySel.value;
+  });
+
+
+  // shift dropdown
+  const shSel = $("shiftSelect");
+  shSel.innerHTML = "";
+  shSel.appendChild(el("option", { value: "", text: " " }));
+  for (const opt of FORM_DEF.shiftOptions) {
+    shSel.appendChild(el("option", { value: opt, text: opt }));
+  }
+  shSel.addEventListener("change", () => {
+    STATE.header.shift = shSel.value;
+  });
+
+  // weather dropdown
+  const weSel = $("weatherSelect");
+  weSel.innerHTML = "";
+  for (const opt of FORM_DEF.weatherOptions) {
+    weSel.appendChild(el("option", { value: opt, text: opt }));
+  }
+  weSel.appendChild(el("option", { value: "__custom__", text: "Custom..." }));
+  weSel.addEventListener("change", () => {
+    STATE.header.weather = weSel.value;
+    setHidden($("weatherCustomRow"), weSel.value !== "__custom__");
+  });
+  $("weatherCustom").addEventListener("input", (e) => {
+    STATE.header.weatherCustom = e.target.value;
+  });
+
+  // attached pages UI
+  const ap = $("attachedPages");
+  ap.innerHTML = "";
+  for (const a of FORM_DEF.attachedPages) {
+    const key = a.key;
+
+    const cb = el("input", { type: "checkbox" });
+    const fileLabel = el("div", { class: "hint", text: "No file selected" });
+    const fileInput = el("input", {
+      type: "file",
+      accept: ".pdf,image/*",
+      class: "hidden"
+    });
+
+    cb.addEventListener("change", async () => {
+      if (cb.checked) {
+        // trigger file chooser
+        fileInput.click();
+      } else {
+        STATE.attached[key] = null;
+        fileInput.value = "";
+        fileLabel.textContent = "No file selected";
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) {
+        cb.checked = false;
+        STATE.attached[key] = null;
+        fileLabel.textContent = "No file selected";
+        return;
+      }
+      STATE.attached[key] = f;
+      fileLabel.textContent = f.name || "Selected";
+      cb.checked = true;
+    });
+
+    const row = el("div", { class: "row" }, [
+      el("label", { class: "label" }, [
+        cb,
+        el("span", { style: "margin-left:8px; font-weight:800;" , text: a.label })
+      ]),
+      el("button", { class: "btn", type: "button", onclick: () => fileInput.click() }, ["Choose File"]),
+    ]);
+
+    const wrap = el("div", {}, [row, fileInput, fileLabel]);
+    ap.appendChild(wrap);
+  }
+}
+
+function setupCategories() {
+  // init NA flags
+  for (const cat of FORM_DEF.categories) {
+    if (STATE.categoryNA[cat.id] === undefined) STATE.categoryNA[cat.id] = false;
+  }
+
+  const host = $("categories");
+  host.innerHTML = "";
+
+  for (const cat of FORM_DEF.categories) {
+    const catId = cat.id;
+
+    const naCb = el("input", { type: "checkbox" });
+    naCb.checked = !!STATE.categoryNA[catId];
+
+    const toggle = el("div", { class: "toggle", text: "Collapse" });
+    const itemsWrap = el("div", { class: "category-items" });
+
+    const header = el("div", { class: "cat-header" }, [
+      el("div", { class: "cat-title", text: cat.title }),
+      el("div", { class: "cat-actions" }, [
+        el("label", { class: "na" }, [naCb, el("span", { text: "N/A" })]),
+        toggle
+      ])
+    ]);
+
+    const card = el("section", { class: "card" }, [
+      header,
+      itemsWrap
+    ]);
+
+    // collapse behavior
+    let collapsed = false;
+    toggle.addEventListener("click", () => {
+      collapsed = !collapsed;
+      itemsWrap.style.display = collapsed ? "none" : "";
+      toggle.textContent = collapsed ? "Expand" : "Collapse";
+    });
+
+    // NA behavior
+    naCb.addEventListener("change", () => {
+      STATE.categoryNA[catId] = naCb.checked;
+      // disable/hide items when NA
+      itemsWrap.style.display = naCb.checked ? "none" : (collapsed ? "none" : "");
+    });
+
+    // render items
+    for (const item of cat.items) {
+      const itemState = ensureItemState(item.id);
+      const itemEl = renderItem(catId, item, itemState);
+      itemsWrap.appendChild(itemEl);
+    }
+
+    // initial NA hide
+    if (naCb.checked) {
+      itemsWrap.style.display = "none";
+    }
+
+    host.appendChild(card);
+  }
+}
+
+function renderItem(catId, item, itemState) {
+  const wrap = el("div", { class: "item" });
+
+  const q = el("div", { class: "question", text: item.question });
+
+  // yes/no segmented control
+  const seg = el("div", { class: "seg" });
+  const btnYes = el("button", { class: "seg-btn", type: "button", text: "Yes" });
+  const btnNo = el("button", { class: "seg-btn", type: "button", text: "No" });
+
+  function syncSeg() {
+    btnYes.classList.toggle("active", itemState.answer === "yes");
+    btnNo.classList.toggle("active", itemState.answer === "no");
+  }
+  btnYes.addEventListener("click", () => {
+    itemState.answer = (itemState.answer === "yes") ? "" : "yes";
+    syncSeg();
+  });
+  btnNo.addEventListener("click", () => {
+    itemState.answer = (itemState.answer === "no") ? "" : "no";
+    syncSeg();
+  });
+  syncSeg();
+  seg.appendChild(btnYes);
+  seg.appendChild(btnNo);
+
+  // prompts or comment
+  let inputsBlock = el("div", { class: "subgrid" });
+
+  if (item.prompts && item.prompts.length) {
+    for (const p of item.prompts) {
+      const inp = el("input", {
+        class: "input",
+        type: "text",
+        placeholder: p.label
+      });
+      inp.value = itemState.prompts[p.key] || "";
+      inp.addEventListener("input", () => {
+        itemState.prompts[p.key] = inp.value;
+      });
+      inputsBlock.appendChild(el("div", {}, [
+        el("div", { class: "hint", text: p.label }),
+        inp
+      ]));
+    }
+  } else {
+    const ta = el("textarea", {
+      class: "input textarea",
+      rows: 2,
+      placeholder: "Comments"
+    });
+    ta.value = itemState.comment || "";
+    ta.addEventListener("input", () => {
+      itemState.comment = ta.value;
+    });
+    inputsBlock.appendChild(ta);
+  }
+
+  // photos
+  const photoInput = el("input", {
+    type: "file",
+    accept: "image/*",
+    multiple: "multiple",
+    class: "hidden"
+  });
+  const btnAddPhoto = el("button", { class: "btn", type: "button", text: "Add Photo" });
+  const thumbs = el("div", { class: "thumbs" });
+
+  btnAddPhoto.addEventListener("click", () => photoInput.click());
+
+  function renderThumbs() {
+    thumbs.innerHTML = "";
+    for (let i=0;i<itemState.photos.length;i++) {
+      const ph = itemState.photos[i];
+      const img = el("img", { class: "thumb", src: ph.dataUrl });
+      const rm = el("button", { class: "btn small", type: "button", text: "Remove" });
+      rm.addEventListener("click", () => {
+        itemState.photos.splice(i,1);
+        renderThumbs();
+      });
+      thumbs.appendChild(el("div", { class: "thumb-wrap" }, [img, rm]));
+    }
+    if (!itemState.photos.length) {
+      thumbs.appendChild(el("div", { class: "hint", text: "No photos attached." }));
+    }
+  }
+  renderThumbs();
+
+  photoInput.addEventListener("change", async () => {
+    const files = photoInput.files ? Array.from(photoInput.files) : [];
+    if (!files.length) return;
+    for (const f of files) {
+      try {
+        const dataUrl = await readFileAsDataURL(f);
+        itemState.photos.push({
+          dataUrl,
+          mime: f.type || mimeFromDataUrl(dataUrl),
+          name: f.name || `photo.${getFileExtFromMime(f.type)}`,
+          question: item.question,
+          category: catId
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Could not read one of the photos.");
+      }
+    }
+    photoInput.value = "";
+    renderThumbs();
+  });
+
+  wrap.appendChild(q);
+  wrap.appendChild(seg);
+  wrap.appendChild(inputsBlock);
+  wrap.appendChild(el("div", { class: "row" }, [btnAddPhoto, photoInput]));
+  wrap.appendChild(thumbs);
+
+  return wrap;
+}
+
+function setupVisibleEmissions() {
+  const na = $("visibleNA");
+  na.checked = !!STATE.visible.na;
+  na.addEventListener("change", () => {
+    STATE.visible.na = na.checked;
+    syncDisabled();
+  });
+
+  const map = [
+    ["ve_r0_location","location",0],["ve_r0_time","time",0],["ve_r0_obs","obsPeriod",0],["ve_r0_em","emissionTime",0],
+    ["ve_r1_location","location",1],["ve_r1_time","time",1],["ve_r1_obs","obsPeriod",1],["ve_r1_em","emissionTime",1],
+  ];
+
+  function syncDisabled() {
+    const disabled = !!STATE.visible.na;
+    for (const [id] of map) {
+      const input = $(id);
+      if (input) input.disabled = disabled;
+    }
+  }
+
+  for (const [id,key,row] of map) {
+    const input = $(id);
+    input.value = STATE.visible.rows[row][key] || "";
+    input.addEventListener("input", () => {
+      STATE.visible.rows[row][key] = input.value;
+    });
+  }
+  syncDisabled();
+}
+
+function setupComments() {
+  const ta = $("commentsCorrections");
+  ta.value = STATE.commentsCorrections || "";
+  ta.addEventListener("input", () => {
+    STATE.commentsCorrections = ta.value;
+  });
+}
+
+let sigPad = null;
+function setupSignature() {
+  const name = $("printName");
+  name.value = STATE.signature.printName || "";
+  name.addEventListener("input", () => {
+    STATE.signature.printName = name.value;
+  });
+
+  const preview = $("sigPreview");
+  const empty = $("sigEmpty");
+
+  function syncPreview() {
+    if (STATE.signature.dataUrl) {
+      preview.src = STATE.signature.dataUrl;
+      setHidden(preview, false);
+      setHidden(empty, true);
+    } else {
+      preview.removeAttribute("src");
+      setHidden(preview, true);
+      setHidden(empty, false);
+    }
+  }
+  syncPreview();
+
   const modal = $("sigModal");
   const canvas = $("sigCanvas");
-  const preview = $("sigPreview");
+  const btnOpen = $("btnSign");
+  const btnClear = $("btnClearSig");
+  const btnCancel = $("sigCancel");
+  const btnSave = $("sigSave");
+  const btnClear2 = $("sigClear");
 
-  clearCanvas(preview);
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(ratio, ratio);
+    if (sigPad) sigPad.clear();
+  }
 
-  openBtn.addEventListener('click', async () => {
-    modal.classList.remove('hidden');
-    resizeSigCanvasToCss(canvas);
-    clearCanvas(canvas);
-    if (sigDataUrl){
-      await drawDataUrlToCanvas(sigDataUrl, canvas);
+  btnOpen.addEventListener("click", () => {
+    setHidden(modal, false);
+    // signature pad init
+    if (!sigPad) {
+      sigPad = new SignaturePad(canvas, {
+        minWidth: 0.7,
+        maxWidth: 2.0
+      });
+    }
+    // resize after visible
+    setTimeout(() => {
+      resizeCanvas();
+      sigPad.clear();
+    }, 50);
+  });
+
+  btnCancel.addEventListener("click", () => {
+    setHidden(modal, true);
+  });
+
+  btnClear2.addEventListener("click", () => {
+    if (sigPad) sigPad.clear();
+  });
+  btnClear.addEventListener("click", () => {
+    STATE.signature.dataUrl = "";
+    syncPreview();
+  });
+
+  btnSave.addEventListener("click", () => {
+    if (!sigPad || sigPad.isEmpty()) {
+      alert("Please sign before saving.");
+      return;
+    }
+    STATE.signature.dataUrl = sigPad.toDataURL("image/png");
+    setHidden(modal, true);
+    syncPreview();
+  });
+
+  // close when clicking backdrop
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) setHidden(modal, true);
+  });
+
+  window.addEventListener("resize", () => {
+    if (!modal.classList.contains("hidden")) {
+      resizeCanvas();
     }
   });
-
-  $("sigCancel").addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
-
-  $("sigClear").addEventListener('click', () => {
-    clearCanvas(canvas);
-  });
-
-  $("sigSave").addEventListener('click', async () => {
-    sigDataUrl = canvas.toDataURL('image/png');
-    await drawDataUrlToCanvas(sigDataUrl, preview);
-    modal.classList.add('hidden');
-    const hint = document.querySelector('.sig-hint');
-    if (hint) hint.style.display = 'none';
-  });
-
-  enableInk(canvas);
 }
 
-function enableInk(canvas){
-  const ctx = canvas.getContext('2d');
-  let drawing = false;
-  let last = null;
+function bindButtons() {
+  for (const btn of document.querySelectorAll('[data-action="reset"]')) {
+    btn.addEventListener("click", () => resetForm());
+  }
+  for (const btn of document.querySelectorAll('[data-action="save"]')) {
+    btn.addEventListener("click", () => savePdf());
+  }
+}
 
-  function getPos(e){
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    return {x,y};
+function resetForm() {
+  if (!confirm("Clear the entire form?")) return;
+
+  STATE.header.project = "";
+  STATE.header.projectCustom = "";
+  STATE.header.reportDate = todayISO();
+  STATE.header.day = "";
+  STATE.header.shift = "";
+  STATE.header.weather = "";
+  STATE.header.weatherCustom = "";
+
+  STATE.attached.accident = null;
+  STATE.attached.incident = null;
+  STATE.attached.safety = null;
+
+  for (const k of Object.keys(STATE.categoryNA)) STATE.categoryNA[k] = false;
+  STATE.responses = {};
+
+  STATE.visible.na = false;
+  STATE.visible.rows = [
+    { location:"", time:"", obsPeriod:"", emissionTime:"" },
+    { location:"", time:"", obsPeriod:"", emissionTime:"" }
+  ];
+
+  STATE.commentsCorrections = "";
+  STATE.signature.printName = "";
+  STATE.signature.dataUrl = "";
+
+  // re-render everything simple way: reload
+  window.location.reload();
+}
+
+function wrapLineToWidth(line, font, size, maxWidth) {
+  // Greedy wrap by words; preserves existing word order.
+  const words = String(line || "").split(/\s+/).filter(Boolean);
+  const out = [];
+  let cur = "";
+  for (const w of words) {
+    const test = cur ? (cur + " " + w) : w;
+    const width = font.widthOfTextAtSize(test, size);
+    if (width <= maxWidth || !cur) {
+      cur = test;
+    } else {
+      out.push(cur);
+      cur = w;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function wrapParagraph(text, font, size, maxWidth) {
+  const paras = String(text || "").split(/\n+/);
+  const lines = [];
+  for (const para of paras) {
+    const trimmed = para.trim();
+    if (!trimmed) {
+      lines.push("");
+      continue;
+    }
+    lines.push(...wrapLineToWidth(trimmed, font, size, maxWidth));
+  }
+  return lines;
+}
+
+function drawTextTop(page, text, x, yTop, size, font) {
+  if (!text) return;
+  const y = page.getHeight() - yTop;
+  page.drawText(String(text), { x, y, size, font });
+}
+
+function drawX(page, x, yTop) {
+  drawTextTop(page, "X", x, yTop, 11, page._fonts?.helv || undefined);
+}
+
+function drawCenteredTextTop(page, text, x, yCenterTop, size, font) {
+  if (!text) return;
+  const y = page.getHeight() - yCenterTop;
+  page.drawText(String(text), { x, y, size, font });
+}
+
+function drawWrappedTextInBoxTop(page, text, box, font, size) {
+  if (!text) return;
+  const padding = box.padding ?? 2;
+  const x = box.x0 + padding;
+  const maxWidth = (box.x1 - box.x0) - padding*2;
+  const lineHeight = size + 2;
+  const lines = wrapParagraph(String(text), font, size, maxWidth);
+
+  // baseline yTop for first line
+  let y = box.yTop + padding + size; // top-based baseline
+  const maxY = box.yBottom - padding;
+
+  for (let i=0;i<lines.length;i++) {
+    if (y > maxY) break;
+    const line = lines[i];
+    if (line) {
+      page.drawText(line, {
+        x,
+        y: page.getHeight() - y,
+        size,
+        font
+      });
+    }
+    y += lineHeight;
+  }
+}
+
+async function appendPdf(pdfDoc, file) {
+  const bytes = await file.arrayBuffer();
+  const src = await PDFLib.PDFDocument.load(bytes);
+  const copied = await pdfDoc.copyPages(src, src.getPageIndices());
+  for (const p of copied) pdfDoc.addPage(p);
+}
+
+async function appendImageAsPage(pdfDoc, file, titleText = "") {
+  const dataUrl = await readFileAsDataURL(file);
+  const mime = file.type || mimeFromDataUrl(dataUrl);
+  const bytes = dataUrlToUint8(dataUrl);
+
+  const page = pdfDoc.addPage([612, 792]);
+  const helv = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+  if (titleText) {
+    page.drawText(titleText, { x: 24, y: 792-24-14, size: 14, font: helv });
   }
 
-  function start(e){
-    drawing = true;
-    last = getPos(e);
-    ctx.lineWidth = Math.max(3, canvas.height * 0.015);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#111';
+  let img;
+  if (mime === "image/png") img = await pdfDoc.embedPng(bytes);
+  else img = await pdfDoc.embedJpg(bytes);
+
+  const margin = 24;
+  const yTop = titleText ? 24 + 18 : 24;
+  const availW = 612 - margin*2;
+  const availH = 792 - margin - yTop;
+
+  const dims = img.scale(1);
+  const scale = Math.min(availW / dims.width, availH / dims.height);
+  const w = dims.width * scale;
+  const h = dims.height * scale;
+
+  const x = (612 - w) / 2;
+  const y = (792 - yTop) - h;
+
+  page.drawImage(img, { x, y, width: w, height: h });
+}
+
+async function addPhotoPages(pdfDoc) {
+  // Gather photos
+  const photos = [];
+  for (const [itemId, st] of Object.entries(STATE.responses)) {
+    for (const ph of (st.photos || [])) {
+      if (ph.category && STATE.categoryNA[ph.category]) continue;
+      photos.push({
+        dataUrl: ph.dataUrl,
+        mime: ph.mime || mimeFromDataUrl(ph.dataUrl),
+        header: ph.question || itemId
+      });
+    }
+  }
+  if (!photos.length) return;
+
+  const helv = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const helvBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+  const pageW = 612, pageH = 792;
+  const margin = 24;
+  const gap = 16;
+
+  const cellW = (pageW - margin*2 - gap) / 2;
+  const cellH = (pageH - margin*2 - gap) / 2;
+  const headerH = 28;
+  const imgPad = 6;
+
+  for (let i=0;i<photos.length;i+=4) {
+    const page = pdfDoc.addPage([pageW, pageH]);
+
+    const batch = photos.slice(i, i+4);
+    for (let j=0;j<batch.length;j++) {
+      const r = Math.floor(j/2);
+      const c = j%2;
+      const x0 = margin + c*(cellW + gap);
+      const y0 = pageH - margin - (r+1)*cellH - r*gap; // bottom y in PDF coords
+
+      const headerText = batch[j].header || "";
+      const headerLines = wrapLineToWidth(headerText, helvBold, 10, cellW);
+      const headerLine = headerLines[0] || "";
+      page.drawText(headerLine, {
+        x: x0,
+        y: y0 + cellH - headerH + 10,
+        size: 10,
+        font: helvBold
+      });
+
+      const imgAreaX = x0;
+      const imgAreaY = y0;
+      const imgAreaW = cellW;
+      const imgAreaH = cellH - headerH;
+
+      const bytes = dataUrlToUint8(batch[j].dataUrl);
+      let img;
+      if ((batch[j].mime || "").includes("png")) img = await pdfDoc.embedPng(bytes);
+      else img = await pdfDoc.embedJpg(bytes);
+
+      const dims = img.scale(1);
+      const scale = Math.min((imgAreaW - imgPad*2) / dims.width, (imgAreaH - imgPad*2) / dims.height);
+      const w = dims.width * scale;
+      const h = dims.height * scale;
+      const x = imgAreaX + (imgAreaW - w)/2;
+      const y = imgAreaY + (imgAreaH - h)/2;
+
+      page.drawImage(img, { x, y, width: w, height: h });
+    }
+  }
+}
+
+async function savePdf() {
+  try {
+    const bytes = await buildPdf();
+    const proj = getProjectValue();
+    const d = fmtDateDotsShort(STATE.header.reportDate || todayISO());
+    const safeProj = sanitizeFilePart(proj);
+    const fileName = `DSIF_${d}${safeProj ? "_" + safeProj : ""}.pdf`;
+
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    console.error(e);
+    alert("Failed to generate PDF. See console for details.");
+  }
+}
+
+async function buildPdf() {
+  const templateBytes = await fetch(FORM_DEF.templatePdf).then(r => r.arrayBuffer());
+  const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+
+  const helv = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const helvBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+  const pages = pdfDoc.getPages();
+  const p1 = pages[0];
+  const p2 = pages[1];
+
+  const naStamp = getNAStamp();
+
+  // Header (page 1)
+  const proj = getProjectValue();
+  const weather = getWeatherValue();
+  const dateSlash = fmtDateSlashes(STATE.header.reportDate);
+
+  drawCenteredTextTop(p1, proj, FORM_DEF.headerCoords.project.x, FORM_DEF.headerCoords.project.yCenter, 12, helv);
+  drawCenteredTextTop(p1, dateSlash, FORM_DEF.headerCoords.reportDate.x, FORM_DEF.headerCoords.reportDate.yCenter, 12, helv);
+  const dayOut = (STATE.header.day && STATE.header.shift)
+    ? `${STATE.header.day} (${STATE.header.shift})`
+    : (STATE.header.day || STATE.header.shift || "");
+  drawCenteredTextTop(p1, dayOut, FORM_DEF.headerCoords.day.x, FORM_DEF.headerCoords.day.yCenter, 12, helv);
+  drawCenteredTextTop(p1, weather, FORM_DEF.headerCoords.weather.x, FORM_DEF.headerCoords.weather.yCenter, 12, helv);
+
+  // Attached pages checkmarks
+  for (const a of FORM_DEF.attachedPages) {
+    const f = STATE.attached[a.key];
+    if (!f) continue;
+    const m = FORM_DEF.headerCoords.attachedMarks[a.key];
+    if (m) drawCenteredTextTop(p1, "X", m.x, m.yCenter, 12, helvBold);
   }
 
-  function move(e){
-    if (!drawing) return;
-    const p = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(last.x, last.y);
-    ctx.lineTo(p.x, p.y);
-    ctx.stroke();
-    last = p;
+  // Checklist items
+  for (const cat of FORM_DEF.categories) {
+    const catNA = !!STATE.categoryNA[cat.id];
+    for (const item of cat.items) {
+      const page = item.page === 1 ? p1 : p2;
+      const rowCenter = (item.yTop + item.yBottom) / 2;
+
+      const st = ensureItemState(item.id);
+      const ans = catNA ? "" : (st.answer || "");
+
+      // Yes/No mark
+      if (ans === "yes") {
+        drawCenteredTextTop(page, "X", FORM_DEF.grid.xYes, rowCenter, 11, helvBold);
+      } else if (ans === "no") {
+        drawCenteredTextTop(page, "X", FORM_DEF.grid.xNo, rowCenter, 11, helvBold);
+      }
+
+      // Prompts or comment
+      if (item.prompts && item.prompts.length) {
+        for (let i=0;i<item.prompts.length;i++) {
+          const p = item.prompts[i];
+          const val = catNA ? naStamp : (st.prompts[p.key] || "");
+          if (val) {
+            drawCenteredTextTop(page, val, p.x, p.yCenter, 9, helv);
+          }
+        }
+      } else {
+        const comment = catNA ? naStamp : (st.comment || "");
+        if (comment) {
+          drawWrappedTextInBoxTop(page, comment, {
+            x0: FORM_DEF.grid.xComment0,
+            x1: FORM_DEF.grid.xComment1,
+            yTop: item.yTop,
+            yBottom: item.yBottom,
+            padding: 2
+          }, helv, 8);
+        }
+      }
+    }
   }
 
-  function end(){
-    drawing = false;
-    last = null;
+  // Visible emissions table (page 2)
+  const ve = FORM_DEF.visibleEmissions;
+  const veNA = !!STATE.visible.na;
+  for (let r=0;r<ve.rows.length;r++) {
+    const rowBox = ve.rows[r];
+    const rowState = STATE.visible.rows[r] || {};
+
+    for (const col of ve.cols) {
+      let val = (rowState[col.key] || "").trim();
+      if (veNA && col.key === "location" && r === 0) {
+        val = naStamp;
+      }
+      if (veNA && col.key === "location" && r === 1) {
+        val = ""; // keep only first line
+      }
+      if (!val) continue;
+
+      // single-line fit
+      const maxW = (col.x1 - col.x0) - 4;
+      let out = val;
+      while (out.length > 0 && helv.widthOfTextAtSize(out, 9) > maxW) {
+        out = out.slice(0, -1);
+      }
+      drawTextTop(p2, out, col.x0 + 2, rowBox.yTop + 10, 9, helv);
+    }
   }
 
-  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); canvas.setPointerCapture(e.pointerId); start(e); });
-  canvas.addEventListener('pointermove', (e) => { e.preventDefault(); move(e); });
-  canvas.addEventListener('pointerup', (e) => { e.preventDefault(); end(); });
-  canvas.addEventListener('pointercancel', (e) => { e.preventDefault(); end(); });
+  // Comments / Corrections (page 2)
+  if (STATE.commentsCorrections && STATE.commentsCorrections.trim()) {
+    drawWrappedTextInBoxTop(p2, STATE.commentsCorrections.trim(), {
+      x0: FORM_DEF.commentsCorrectionsBox.x0,
+      x1: FORM_DEF.commentsCorrectionsBox.x1,
+      yTop: FORM_DEF.commentsCorrectionsBox.yTop,
+      yBottom: FORM_DEF.commentsCorrectionsBox.yBottom,
+      padding: 2
+    }, helv, 9);
+  }
+
+  // Print Name (page 2)
+  if (STATE.signature.printName && STATE.signature.printName.trim()) {
+    drawCenteredTextTop(p2, STATE.signature.printName.trim(),
+      FORM_DEF.signatureCoords.printName.x,
+      FORM_DEF.signatureCoords.printName.yCenter,
+      10,
+      helv
+    );
+  }
+
+  // Signature image (page 2)
+  if (STATE.signature.dataUrl) {
+    const sigBytes = dataUrlToUint8(STATE.signature.dataUrl);
+    const sigImg = await pdfDoc.embedPng(sigBytes);
+
+    const box = FORM_DEF.signatureCoords.signatureBox;
+    const boxW = (box.xRight - box.x);
+    const boxH = (box.yBottom - box.yTop);
+    const dims = sigImg.scale(1);
+    const scale = Math.min(boxW / dims.width, boxH / dims.height);
+    const w = dims.width * scale;
+    const h = dims.height * scale;
+
+    const x = box.x + (boxW - w)/2;
+    // PDF coords from bottom:
+    const yTopBased = box.yTop + (boxH - h)/2;
+    const y = p2.getHeight() - yTopBased - h;
+
+    p2.drawImage(sigImg, { x, y, width: w, height: h });
+  }
+
+  // Append attached pages
+  for (const a of FORM_DEF.attachedPages) {
+    const f = STATE.attached[a.key];
+    if (!f) continue;
+    const isPdf = (f.type === "application/pdf") || (String(f.name||"").toLowerCase().endsWith(".pdf"));
+    if (isPdf) {
+      await appendPdf(pdfDoc, f);
+    } else {
+      await appendImageAsPage(pdfDoc, f, a.label);
+    }
+  }
+
+  // Append photo pages (4 per page)
+  await addPhotoPages(pdfDoc);
+
+  return await pdfDoc.save();
 }
 
-function clearCanvas(canvas){
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-}
-
-function resizeSigCanvasToCss(canvas){
-  const rect = canvas.getBoundingClientRect();
-  const scale = Math.min(2, window.devicePixelRatio || 1);
-  canvas.width = Math.max(800, Math.floor(rect.width * scale));
-  canvas.height = Math.max(280, Math.floor(rect.height * scale));
-}
-
-function drawDataUrlToCanvas(dataUrl, canvas){
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-
-      const pad = Math.max(10, canvas.width * 0.02);
-      const maxW = canvas.width - pad*2;
-      const maxH = canvas.height - pad*2;
-      const s = Math.min(maxW / img.width, maxH / img.height);
-      const w = img.width * s;
-      const h = img.height * s;
-      const x = (canvas.width - w)/2;
-      const y = (canvas.height - h)/2;
-      ctx.drawImage(img, x, y, w, h);
-      resolve();
-    };
-    img.src = dataUrl;
-  });
-}
-
-window.addEventListener('DOMContentLoaded', init);
+document.addEventListener("DOMContentLoaded", () => {
+  setupHeader();
+  setupCategories();
+  setupVisibleEmissions();
+  setupComments();
+  setupSignature();
+  bindButtons();
+});
