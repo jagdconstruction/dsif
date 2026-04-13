@@ -1216,20 +1216,24 @@ function renderItem(catId, item, itemState) {
 
   if (item.prompts && item.prompts.length) {
     for (const p of item.prompts) {
-      const inp = el("input", {
-        class: "input",
-        type: "text",
-        placeholder: p.label
-      });
-      inp.value = itemState.prompts[p.key] || "";
-      inp.addEventListener("input", () => {
-        itemState.prompts[p.key] = inp.value;
-      });
-      inputsBlock.appendChild(el("div", {}, [
-        el("div", { class: "hint", text: p.label }),
-        inp
-      ]));
-    }
+  const cleanLabel = String(p.label || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const inp = el("input", {
+    class: "input",
+    type: "text",
+    placeholder: cleanLabel ? (`Enter ${cleanLabel}`) : "Enter text"
+  });
+  inp.value = itemState.prompts[p.key] || "";
+  inp.addEventListener("input", () => {
+    itemState.prompts[p.key] = inp.value;
+  });
+  inputsBlock.appendChild(el("div", {}, [
+    el("div", { class: "hint hint-required", text: cleanLabel ? (`Enter: ${cleanLabel}`) : "Enter required text" }),
+    inp
+  ]));
+}
   } else {
     const ta = el("textarea", {
       class: "input textarea",
@@ -1476,6 +1480,16 @@ function resetForm() {
   window.location.reload();
 }
 
+
+// DSIF template pages use a CropBox shifted left by ~8.53pt.
+// pdf-lib drawText/drawImage coordinates are based on the MediaBox origin, so without this
+// shift, all overlay content ends up ~8.53pt too far to the right.
+const TEMPLATE_X_SHIFT = -8.5322904586792;
+// DSIF template pages also have a CropBox/MediaBox bottom offset of ~8.50pt.
+// pdf-lib coordinates appear to be based on unshifted user space, so we need to
+// shift Y up by this amount to keep row marks centered vertically.
+const TEMPLATE_Y_SHIFT = 8.503940105438232;
+
 function wrapLineToWidth(line, font, size, maxWidth) {
   // Greedy wrap by words; preserves existing word order.
   const words = String(line || "").split(/\s+/).filter(Boolean);
@@ -1512,7 +1526,7 @@ function wrapParagraph(text, font, size, maxWidth) {
 function drawTextTop(page, text, x, yTop, size, font) {
   if (!text) return;
   const y = page.getHeight() - yTop;
-  page.drawText(String(text), { x, y, size, font });
+  page.drawText(String(text), { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, size, font });
 }
 
 function drawX(page, x, yTop) {
@@ -1522,13 +1536,13 @@ function drawX(page, x, yTop) {
 function drawCenteredTextTop(page, text, x, yCenterTop, size, font) {
   if (!text) return;
   const y = page.getHeight() - yCenterTop;
-  page.drawText(String(text), { x, y, size, font });
+  page.drawText(String(text), { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, size, font });
 }
 
 function drawWrappedTextInBoxTop(page, text, box, font, size) {
   if (!text) return;
   const padding = box.padding ?? 2;
-  const x = box.x0 + padding;
+  const x = box.x0 + padding + TEMPLATE_X_SHIFT;
   const maxWidth = (box.x1 - box.x0) - padding*2;
   const lineHeight = size + 2;
   const lines = wrapParagraph(String(text), font, size, maxWidth);
@@ -1543,7 +1557,7 @@ function drawWrappedTextInBoxTop(page, text, box, font, size) {
     if (line) {
       page.drawText(line, {
         x,
-        y: page.getHeight() - y,
+        y: (page.getHeight() - y) + TEMPLATE_Y_SHIFT,
         size,
         font
       });
@@ -1824,7 +1838,7 @@ async function buildPdf() {
     const yTopBased = box.yTop + (boxH - h)/2;
     const y = p2.getHeight() - yTopBased - h;
 
-    p2.drawImage(sigImg, { x, y, width: w, height: h });
+    p2.drawImage(sigImg, { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, width: w, height: h });
   }
 
   // Append attached pages
