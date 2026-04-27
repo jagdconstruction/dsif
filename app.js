@@ -1228,6 +1228,9 @@ function renderItem(catId, item, itemState) {
   if (item.id === "contain_24") {
       inputsBlock.classList.add("prompts");
 
+      // When YES: show verification dropdown (+ Magnehelic reading when applicable)
+      const yesBlock = el("div", { class: "promptBlock" });
+
       const howWrap = el("div", { class: "promptRow" });
       howWrap.appendChild(el("div", { class: "plabel", text: "How was negative pressure verified?" }));
       const howSel = el("select", { class: "pinput" });
@@ -1241,7 +1244,7 @@ function renderItem(catId, item, itemState) {
         syncReading();
       });
       howWrap.appendChild(howSel);
-      inputsBlock.appendChild(howWrap);
+      yesBlock.appendChild(howWrap);
 
       const readingWrap = el("div", { class: "promptRow" });
       readingWrap.appendChild(el("div", { class: "plabel", text: "Magnehelic reading?" }));
@@ -1251,7 +1254,7 @@ function renderItem(catId, item, itemState) {
         itemState.prompts.reading = readingInp.value;
       });
       readingWrap.appendChild(readingInp);
-      inputsBlock.appendChild(readingWrap);
+      yesBlock.appendChild(readingWrap);
 
       const syncReading = () => {
         const how = (howSel.value || "").trim();
@@ -1259,9 +1262,43 @@ function renderItem(catId, item, itemState) {
       };
       syncReading();
 
-      // Only required when the main question is answered YES.
+      // When NO: show a short comments box so the user can explain.
+      const noBlock = el("div", { class: "promptBlock" });
+      const noHint = el("div", { class: "hint hint-required", text: "If NO, explain in comments" });
+      noBlock.appendChild(noHint);
+      const noTa = el("textarea", {
+        class: "input textarea",
+        rows: 2,
+        placeholder: "Comments"
+      });
+      noTa.value = itemState.comment || "";
+      noTa.addEventListener("input", () => {
+        itemState.comment = noTa.value;
+      });
+      noBlock.appendChild(noTa);
+
+      inputsBlock.appendChild(yesBlock);
+      inputsBlock.appendChild(noBlock);
+
+      // Show YES-block only when answered YES, show NO-block only when answered NO.
       extraSync = () => {
-        inputsBlock.style.display = itemState.answer === "yes" ? "" : "none";
+        const a = itemState.answer || "";
+        if (a === "yes") {
+          inputsBlock.style.display = "";
+          yesBlock.style.display = "";
+          noBlock.style.display = "none";
+        } else if (a === "no") {
+          inputsBlock.style.display = "";
+          yesBlock.style.display = "none";
+          noBlock.style.display = "";
+          noHint.textContent = "If NO, explain in comments";
+        } else {
+          // If unanswered, keep a blank comments area visible so the user can explain why.
+          inputsBlock.style.display = "";
+          yesBlock.style.display = "none";
+          noBlock.style.display = "";
+          noHint.textContent = "If left blank, explain why it was not answered";
+        }
       };
       extraSync();
     } else if (item.prompts && item.prompts.length) {
@@ -1836,7 +1873,7 @@ async function buildPdf() {
           let phrase = "";
           if (how === "Visually") phrase = "Verified visually";
           else if (how === "Magnehelic") phrase = "Verified by Magnehelic";
-          else if (how === "Both") phrase = "Verified visually and by magnehelic";
+          else if (how === "Both") phrase = "Verified visually and by Magnehelic";
 
           if (phrase) {
             drawTextTop(page, phrase, FORM_DEF.grid.xComment0 + 4, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
@@ -1846,6 +1883,32 @@ async function buildPdf() {
             const reading = String((st.prompts && st.prompts.reading) || "").trim();
             const readingText = reading ? `Reading: ${reading}` : "Reading:";
             drawTextTop(page, readingText, FORM_DEF.grid.xComment0 + 175, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
+          }
+        } else if (ans === "no") {
+          const c = String(st.comment || "").trim();
+          if (c) {
+            const x0 = FORM_DEF.grid.xComment0 + 4;
+            const maxW = (FORM_DEF.grid.xComment1 - 4) - x0;
+            let out = c;
+            // Fit to a single line (row height is small). Use ellipsis if needed.
+            while (out.length > 0 && helv.widthOfTextAtSize(out + "…", 8) > maxW) {
+              out = out.slice(0, -1);
+            }
+            if (out.length < c.length) out = (out ? out + "…" : "");
+            if (out) drawTextTop(page, out, x0, rowCenter + ROW_BASELINE_NUDGE, 8, helv);
+          }
+        } else {
+          // Unanswered: allow a short reason to be printed in the comments area.
+          const c = String(st.comment || "").trim();
+          if (c) {
+            const x0 = FORM_DEF.grid.xComment0 + 4;
+            const maxW = (FORM_DEF.grid.xComment1 - 4) - x0;
+            let out = c;
+            while (out.length > 0 && helv.widthOfTextAtSize(out + "…", 8) > maxW) {
+              out = out.slice(0, -1);
+            }
+            if (out.length < c.length) out = (out ? out + "…" : "");
+            if (out) drawTextTop(page, out, x0, rowCenter + ROW_BASELINE_NUDGE, 8, helv);
           }
         }
       } else if (isContain25) {
