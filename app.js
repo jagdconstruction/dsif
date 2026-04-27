@@ -1016,15 +1016,19 @@ function setupHeader() {
   for (const opt of FORM_DEF.projectOptions) {
     projSel.appendChild(el("option", { value: opt, text: opt }));
   }
-  projSel.appendChild(el("option", { value: "__custom__", text: "Custom..." }));
+  const projCustomOpt = el("option", { value: "__custom__", text: "Custom..." });
+  projSel.appendChild(projCustomOpt);
   projSel.addEventListener("change", () => {
     STATE.header.project = projSel.value;
     setHidden($("projectCustomRow"), projSel.value !== "__custom__");
   });
 
-  $("projectCustom").addEventListener("input", (e) => {
-    STATE.header.projectCustom = e.target.value;
-  });
+  const projectCustomInput = $("projectCustom");
+  const syncProjectCustom = () => {
+    STATE.header.projectCustom = projectCustomInput.value.trim();
+    projCustomOpt.textContent = STATE.header.projectCustom ? STATE.header.projectCustom : "Custom...";
+  };
+  ["input", "change", "blur"].forEach((evt) => projectCustomInput.addEventListener(evt, syncProjectCustom));
 
   // date
   const dateEl = $("reportDate");
@@ -1063,14 +1067,18 @@ function setupHeader() {
   for (const opt of FORM_DEF.weatherOptions) {
     weSel.appendChild(el("option", { value: opt, text: opt }));
   }
-  weSel.appendChild(el("option", { value: "__custom__", text: "Custom..." }));
+  const weCustomOpt = el("option", { value: "__custom__", text: "Custom..." });
+    weSel.appendChild(weCustomOpt);
   weSel.addEventListener("change", () => {
     STATE.header.weather = weSel.value;
     setHidden($("weatherCustomRow"), weSel.value !== "__custom__");
   });
-  $("weatherCustom").addEventListener("input", (e) => {
-    STATE.header.weatherCustom = e.target.value;
-  });
+  const weatherCustomInput = $("weatherCustom");
+  const syncWeatherCustom = () => {
+    STATE.header.weatherCustom = weatherCustomInput.value.trim();
+    weCustomOpt.textContent = STATE.header.weatherCustom ? STATE.header.weatherCustom : "Custom...";
+  };
+  ["input", "change", "blur"].forEach((evt) => weatherCustomInput.addEventListener(evt, syncWeatherCustom));
 
   // attached pages UI
   const ap = $("attachedPages");
@@ -1195,9 +1203,12 @@ function renderItem(catId, item, itemState) {
   const btnYes = el("button", { class: "seg-btn", type: "button", text: "Yes" });
   const btnNo = el("button", { class: "seg-btn", type: "button", text: "No" });
 
+  let extraSync = null;
+
   function syncSeg() {
     btnYes.classList.toggle("active", itemState.answer === "yes");
     btnNo.classList.toggle("active", itemState.answer === "no");
+    if (extraSync) extraSync();
   }
   btnYes.addEventListener("click", () => {
     itemState.answer = (itemState.answer === "yes") ? "" : "yes";
@@ -1214,7 +1225,46 @@ function renderItem(catId, item, itemState) {
   // prompts or comment
   let inputsBlock = el("div", { class: "subgrid" });
 
-  if (item.prompts && item.prompts.length) {
+  if (item.id === "contain_24") {
+      inputsBlock.classList.add("prompts");
+
+      const howWrap = el("div", { class: "promptRow" });
+      howWrap.appendChild(el("div", { class: "plabel", text: "How was negative pressure verified?" }));
+      const howSel = el("select", { class: "pinput" });
+      howSel.appendChild(el("option", { value: "", text: "" }));
+      ["Visually", "Magnehelic", "Both"].forEach((opt) =>
+        howSel.appendChild(el("option", { value: opt, text: opt }))
+      );
+      howSel.value = itemState.prompts.visual || "";
+      howSel.addEventListener("change", () => {
+        itemState.prompts.visual = howSel.value;
+        syncReading();
+      });
+      howWrap.appendChild(howSel);
+      inputsBlock.appendChild(howWrap);
+
+      const readingWrap = el("div", { class: "promptRow" });
+      readingWrap.appendChild(el("div", { class: "plabel", text: "Magnehelic reading?" }));
+      const readingInp = el("input", { class: "pinput", placeholder: "Reading", inputmode: "decimal" });
+      readingInp.value = itemState.prompts.reading || "";
+      readingInp.addEventListener("input", () => {
+        itemState.prompts.reading = readingInp.value;
+      });
+      readingWrap.appendChild(readingInp);
+      inputsBlock.appendChild(readingWrap);
+
+      const syncReading = () => {
+        const how = (howSel.value || "").trim();
+        readingWrap.style.display = how === "Magnehelic" || how === "Both" ? "" : "none";
+      };
+      syncReading();
+
+      // Only required when the main question is answered YES.
+      extraSync = () => {
+        inputsBlock.style.display = itemState.answer === "yes" ? "" : "none";
+      };
+      extraSync();
+    } else if (item.prompts && item.prompts.length) {
     for (const p of item.prompts) {
   const cleanLabel = String(p.label || "")
     .replace(/\s+/g, " ")
@@ -1490,6 +1540,10 @@ const TEMPLATE_X_SHIFT = -8.5322904586792;
 // shift Y up by this amount to keep row marks centered vertically.
 const TEMPLATE_Y_SHIFT = 8.503940105438232;
 
+// Small calibration nudges (top-based coordinates)
+const ROW_BASELINE_NUDGE = 2.0; // move X/text slightly down inside table rows
+const SIGNATURE_Y_NUDGE_UP = 3.0; // move signature image up inside signature box
+
 function wrapLineToWidth(line, font, size, maxWidth) {
   // Greedy wrap by words; preserves existing word order.
   const words = String(line || "").split(/\s+/).filter(Boolean);
@@ -1529,6 +1583,19 @@ function drawTextTop(page, text, x, yTop, size, font) {
   page.drawText(String(text), { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, size, font });
 }
 
+function maskRectTop(page, x0, yTop, width, height) {
+  const y = page.getHeight() - (yTop + height);
+  page.drawRectangle({
+    x: x0 + TEMPLATE_X_SHIFT,
+    y: y + TEMPLATE_Y_SHIFT,
+    width,
+    height,
+    color: PDFLib.rgb(1, 1, 1),
+    borderWidth: 0,
+  });
+}
+
+
 function drawX(page, x, yTop) {
   drawTextTop(page, "X", x, yTop, 11, page._fonts?.helv || undefined);
 }
@@ -1539,7 +1606,7 @@ function drawCenteredTextTop(page, text, x, yCenterTop, size, font) {
   page.drawText(String(text), { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, size, font });
 }
 
-function drawWrappedTextInBoxTop(page, text, box, font, size) {
+function drawWrappedTextInBoxTop(page, text, box, font, size, yNudge=0) {
   if (!text) return;
   const padding = box.padding ?? 2;
   const x = box.x0 + padding + TEMPLATE_X_SHIFT;
@@ -1548,7 +1615,7 @@ function drawWrappedTextInBoxTop(page, text, box, font, size) {
   const lines = wrapParagraph(String(text), font, size, maxWidth);
 
   // baseline yTop for first line
-  let y = box.yTop + padding + size; // top-based baseline
+  let y = box.yTop + padding + size + (yNudge || 0); // top-based baseline
   const maxY = box.yBottom - padding;
 
   for (let i=0;i<lines.length;i++) {
@@ -1743,18 +1810,101 @@ async function buildPdf() {
 
       // Yes/No mark
       if (ans === "yes") {
-        drawCenteredTextTop(page, "X", FORM_DEF.grid.xYes, rowCenter, 11, helvBold);
+        drawCenteredTextTop(page, "X", FORM_DEF.grid.xYes, rowCenter + ROW_BASELINE_NUDGE, 11, helvBold);
       } else if (ans === "no") {
-        drawCenteredTextTop(page, "X", FORM_DEF.grid.xNo, rowCenter, 11, helvBold);
+        drawCenteredTextTop(page, "X", FORM_DEF.grid.xNo, rowCenter + ROW_BASELINE_NUDGE, 11, helvBold);
       }
 
       // Prompts or comment
-      if (item.prompts && item.prompts.length) {
+      const isContain24 = item.id === "contain_24";
+      const isContain25 = item.id === "contain_25";
+
+      if (isContain24) {
+        // Clear the template's pre-printed prompt text so our output is clean/legible.
+        maskRectTop(
+          page,
+          FORM_DEF.grid.xComment0 + 1,
+          item.yTop + 1,
+          (FORM_DEF.grid.xComment1 - FORM_DEF.grid.xComment0) - 2,
+          (item.yBottom - item.yTop) - 2
+        );
+
+        if (catNA) {
+          drawTextTop(page, naStamp, FORM_DEF.grid.xComment0 + 4, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
+        } else if (ans === "yes") {
+          const how = String((st.prompts && st.prompts.visual) || "").trim();
+          let phrase = "";
+          if (how === "Visually") phrase = "Verified visually";
+          else if (how === "Magnehelic") phrase = "Verified by Magnehelic";
+          else if (how === "Both") phrase = "Verified visually and by magnehelic";
+
+          if (phrase) {
+            drawTextTop(page, phrase, FORM_DEF.grid.xComment0 + 4, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
+          }
+
+          if (how === "Magnehelic" || how === "Both") {
+            const reading = String((st.prompts && st.prompts.reading) || "").trim();
+            const readingText = reading ? `Reading: ${reading}` : "Reading:";
+            drawTextTop(page, readingText, FORM_DEF.grid.xComment0 + 175, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
+          }
+        }
+      } else if (isContain25) {
+        // Clear the template's pre-printed prompt text (removes "(e.g., Velometer)"), then redraw labels + values.
+        maskRectTop(
+          page,
+          FORM_DEF.grid.xComment0 + 1,
+          item.yTop + 1,
+          (FORM_DEF.grid.xComment1 - FORM_DEF.grid.xComment0) - 2,
+          (item.yBottom - item.yTop) - 2
+        );
+
+        if (catNA) {
+          drawTextTop(page, naStamp, FORM_DEF.grid.xComment0 + 4, rowCenter + ROW_BASELINE_NUDGE, 8, helvBold);
+        } else {
+          const labelSize = 8;
+          const valueBaseSize = 8;
+
+          const methodLabel = "Method:";
+          const airflowLabel = "Airflow Readings:";
+
+          const xMethodLabel = FORM_DEF.grid.xComment0 + 4;
+          const xMethodValue = xMethodLabel + helvBold.widthOfTextAtSize(methodLabel, labelSize) + 4;
+
+          const xAirLabel = FORM_DEF.grid.xComment0 + 135;
+          const xAirValue = xAirLabel + helvBold.widthOfTextAtSize(airflowLabel, labelSize) + 4;
+
+          drawTextTop(page, methodLabel, xMethodLabel, rowCenter + ROW_BASELINE_NUDGE, labelSize, helvBold);
+          drawTextTop(page, airflowLabel, xAirLabel, rowCenter + ROW_BASELINE_NUDGE, labelSize, helvBold);
+
+          const methodVal = String((st.prompts && st.prompts.method) || "").trim();
+          const airflowVal = String((st.prompts && st.prompts.airflow) || "").trim();
+
+          const maxMethodW = (xAirLabel - 6) - xMethodValue;
+          const maxAirW = (FORM_DEF.grid.xComment1 - 4) - xAirValue;
+
+          const fitText = (font, value, maxW, baseSize) => {
+            if (!value) return { text: "", size: baseSize };
+            let s = baseSize;
+            while (s > 6 && font.widthOfTextAtSize(value, s) > maxW) s -= 0.5;
+            // If still too wide, hard-truncate with ellipsis
+            if (font.widthOfTextAtSize(value, s) <= maxW) return { text: value, size: s };
+            let truncated = value;
+            while (truncated.length > 0 && font.widthOfTextAtSize(truncated + "…", s) > maxW) truncated = truncated.slice(0, -1);
+            return { text: truncated ? truncated + "…" : "", size: s };
+          };
+
+          const mFit = fitText(helv, methodVal, maxMethodW, valueBaseSize);
+          const aFit = fitText(helv, airflowVal, maxAirW, valueBaseSize);
+
+          if (mFit.text) drawTextTop(page, mFit.text, xMethodValue, rowCenter + ROW_BASELINE_NUDGE, mFit.size, helv);
+          if (aFit.text) drawTextTop(page, aFit.text, xAirValue, rowCenter + ROW_BASELINE_NUDGE, aFit.size, helv);
+        }
+      } else if (item.prompts && item.prompts.length) {
         for (let i=0;i<item.prompts.length;i++) {
           const p = item.prompts[i];
           const val = catNA ? naStamp : (st.prompts[p.key] || "");
           if (val) {
-            drawCenteredTextTop(page, val, p.x, p.yCenter, 9, helv);
+            drawCenteredTextTop(page, val, p.x, p.yCenter + ROW_BASELINE_NUDGE, 9, helv);
           }
         }
       } else {
@@ -1766,7 +1916,7 @@ async function buildPdf() {
             yTop: item.yTop,
             yBottom: item.yBottom,
             padding: 2
-          }, helv, 8);
+          }, helv, 8, ROW_BASELINE_NUDGE);
         }
       }
     }
@@ -1835,7 +1985,7 @@ async function buildPdf() {
 
     const x = box.x + (boxW - w)/2;
     // PDF coords from bottom:
-    const yTopBased = box.yTop + (boxH - h)/2;
+    const yTopBased = box.yTop + (boxH - h)/2 - SIGNATURE_Y_NUDGE_UP;
     const y = p2.getHeight() - yTopBased - h;
 
     p2.drawImage(sigImg, { x: x + TEMPLATE_X_SHIFT, y: y + TEMPLATE_Y_SHIFT, width: w, height: h });
